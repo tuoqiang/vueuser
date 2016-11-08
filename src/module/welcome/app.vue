@@ -77,7 +77,7 @@
 <script>
 
 
-import Lib from 'assets/Lib.js'
+import Lib from 'assets/js/lib.js'
 
 import moduleHead from 'components/module-head'
 

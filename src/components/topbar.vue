@@ -4,9 +4,6 @@
 
 
 <script>
-
-import Lib from 'assets/Lib.js'
-
 module.exports = {
   props:{
   	"text":{
@@ -15,10 +12,5 @@ module.exports = {
   	}
   }
 }
-
 </script>
 
-
-<style scoped>
-
-</style>
