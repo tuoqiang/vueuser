@@ -3,13 +3,13 @@
 		<div class="toastcover" id="toastcover" ></div>
 		<div class="toastcontaner" id="toastcontaner">
 			<div class="toastcontent">
-				{{content}}
+				{{{content}}}
 			</div>
 			<div id="toastbtnbox" class="toastbtnbox">
-				<div class="toastbtn j-pb-click j-btn" @click="gotoFindpwd">
+				<div v-if="comformbtntxt" class="toastbtn j-pb-click j-btn" @click="gotoFindpwd">
 					{{comformbtntxt}}
 				</div>
-				<div class="toastbtn j-pb-click j-btn toastbtn-left" @click="hideToast">
+				<div  class="toastbtn j-pb-click j-btn " :class="comformbtntxt ? 'toastbtn-left' : 'toastbtnonly'" @click="hideToast">
 					{{cancelbtntxt}}
 				</div>
 			</div>

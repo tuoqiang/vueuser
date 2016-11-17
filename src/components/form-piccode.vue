@@ -26,12 +26,13 @@ import Server from 'assets/js/server.js'
 
 module.exports = {
   props:{
-  		needpiccode:''
+  		needpiccode:false
   },
   data() {
     return {
       piccode:'',
-      piccodeUrl: Server.HOSTNAMES + 'apis/register/vcode.action?width=120&height=46'
+      piccodeUrl: Server.HOSTNAMES + 'apis/register/vcode.action?width=120&height=46',
+      errormsg:'',
     }
   },
   methods: {
@@ -40,13 +41,19 @@ module.exports = {
     }
   },
   events: {
-    'loginAction': function(){
-		this.$dispatch('child-piccode', this.piccode); // 向父组件派发事件：把当前值传给父组件
-  	},
-  	'updatePiccode': function(){
-		this.piccodeUrl = Server.HOSTNAMES + 'apis/register/vcode.action?width=120&height=46&t=' + (+new Date());
-		this.piccode = '';
-  	}
+    'getIptVal': function(){
+    	if(!this.piccode && this.needpiccode){ 
+        this.errormsg='图文验证码不能为空';
+    	}else{
+    	  this.errormsg='';
+    	}
+    	this.$dispatch('child-piccode-check', this.errormsg);
+      this.$dispatch('child-piccode', this.piccode); // 向父组件派发事件：把当前值传给父组件
+    },
+    'updatePiccode': function(){
+      this.piccodeUrl = Server.HOSTNAMES + 'apis/register/vcode.action?width=120&height=46&t=' + (+new Date());
+      this.piccode = '';
+    }
   }
 }
 </script>

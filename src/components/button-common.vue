@@ -1,5 +1,11 @@
 <template>
-  <a href="javascript:;" id="j-btn-login" class="btn form_btnpos {{btnclass}}">{{btntext}}</a>
+  <a href="javascript:;"
+  	 class="btn form_btnpos j-pb-click {{btnclass}}"  
+  	 :data-href="datahref"
+  	 :data-click="dataclick"
+  	 >
+  	 {{btntext}}
+  </a>
 </template>
 
 
@@ -7,7 +13,9 @@
 module.exports = {
   props:{
   	'btntext':'',
-    'btnclass': ''
+    'btnclass': '',
+    'datahref':'',
+    'dataclick':'',
   }
 }
 </script>

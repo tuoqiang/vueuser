@@ -30,7 +30,8 @@ module.exports = {
   data() {
     return {
       pwd:'',
-      pwdType:'password'
+      pwdType:'password',
+      errormsg:'',
     }
   },
   methods: {
@@ -39,8 +40,14 @@ module.exports = {
     }
   },
   events: {
-    'loginAction': function(){
-		this.$dispatch('child-pwd', this.pwd);
+    'getIptVal': function(){
+    	if(!this.pwd){ 
+          this.errormsg='密码不能为空';
+      	}else{
+      	  this.errormsg='';
+      	}
+      	this.$dispatch('child-pwd-check', this.errormsg);
+		    this.$dispatch('child-pwd', this.pwd);
   	}
   }
 }

@@ -48,7 +48,7 @@ var Rxports = {
 		sessionStorage.setItem(key, value);
 	},
 
-	getSessionStorage: function(){
+	getSessionStorage: function(key){
 		return  JSON.parse(sessionStorage.getItem(key));
 	},
 
@@ -77,16 +77,6 @@ var Rxports = {
 
 	getStorage: function(){
 		return JSON.parse(localStorage.getItem(key));
-	},
-
-	/**
-	 * 获取UrlParams storage值
-	 * @return {[type]} [description]
-	 */
-	getUrlParamsStorage: function(){
-		var storage = this.getSessionStorage(Config.URL_PARAMS);
-		console.log('UrlParams localStorage: ', storage);
-		return storage;
 	},
 
 	isLocalStorageSupported: function(){

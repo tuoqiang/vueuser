@@ -3,11 +3,11 @@
     <error-msg v-bind:errmsg='errmsg' v-show="errmsg"></error-msg>
   	<login-tips text="登录后可一键成为VIP会员" v-show="tipsmsg && !errmsg"></login-tips>
   	<form class="form-container contianer_ht1" action="#" autocomplete="on" >
-    		<form-account :localaccount="user.account"></form-account>
+    		<form-account iptplacehold="手机号或邮箱" labelname="账号：" :localaccount="user.account"></form-account>
     		<form-loginpwd :needpiccode="needpiccode" ></form-loginpwd>
     		<form-piccode :needpiccode="needpiccode" ></form-piccode>
-    		<button-common @click="loginAction" btnclass="btn-primary form_btnpos02" btntext="登陆"></button-common>	
-    		<button-common @click="" btnclass="formcommon-sty form_btnpos01" btntext="立即注册"></button-common>	
+    		<button-common @click="loginAction" btnclass="btn-primary form_btnpos02" btntext="登陆" dataclick="login"></button-common>	
+    		<button-common datahref="register.html#rphone" btnclass="formcommon-sty form_btnpos01" btntext="立即注册" dataclick="signup" ></button-common>	
   	</form>
     <toast  content="登录不上？试试找回密码吧"
             comformbtntxt="去试试"
@@ -15,7 +15,6 @@
             v-show="pwdErrorCount > 2">   
     </toast>
     <error-page :errorpage="errorpage" v-show="errorpage"></error-page>
-
 </template>
 
 <script>
@@ -25,6 +24,7 @@ import Utils from 'assets/js/utils.js'
 import Config from 'assets/js/config.js'
 import Server from 'assets/js/server.js'
 import Storage from 'assets/js/storage.js'
+import Pingback from 'assets/js/pingback.js'
 import ButtonCommon from 'components/button-common'
 import ErrorMsg from 'components/error-msg'
 import Topbar from 'components/topbar'
@@ -43,14 +43,17 @@ export default {
               pwd: '',
               piccode: ''
           },
-          urlParams: '',           // 安卓穿透字段
+          urlParams: '',           // 安卓透传字段
         	errmsg: '',              // 错误文案
           tipsmsg: false,          // 从购买页扫码而来时的引导文案
           resneedpiccode: false,   // res.code='P00107'接口返回需要piccode错误码
           needpiccode: false,      // 需要piccode标志位
           submitCount: 0,         // 服务器返回错误次数
           pwdErrorCount: 0,       // 密码错误次数
-          errorpage:''            // 登录失败页面文案
+          errorpage:'',            // 登录失败页面文案
+          accounterrmsg:'',          // 登录失败页面文案
+          pwderrmsg:'',              // 登录失败页面文案
+          piccodeerrmsg:'',            // 登录失败页面文案
       }
   },
   components: {
@@ -65,6 +68,15 @@ export default {
       ErrorPage
   },
   events: {
+      'child-account-check': function (errormsg) {
+          this.accounterrmsg = errormsg;
+      },
+      'child-pwd-check': function (errormsg) {
+          this.pwderrmsg = errormsg;
+      },
+      'child-piccode-check': function (errormsg) {
+          this.piccodeerrmsg = errormsg;
+      },
       'child-account': function (account) {
           this.user.account = account;
       },
@@ -91,24 +103,19 @@ export default {
       if(!!localaccount){
         this.user.account = decodeURIComponent(localaccount);
       }
+      Utils.setEvents();
+      Pingback.init('login', this.urlParams);
+      Pingback.pageLoaded();
   },
   methods: {
       //登陆操作
       loginAction(){
-          this.$broadcast("loginAction"); // 父组件广播一个事件，去通知子组件把账号值传过来
           var self = this;
-          if(!this.user.account){ 
-              this.errmsg='账号不能为空';
-              return false;
-          }
-          if(!this.user.pwd){ 
-              this.errmsg='密码不能为空';
-              return false;
-          }
-          if(!this.user.piccode && this.needpiccode){
-              this.errmsg='图文验证码不能为空';
-              return false;
-          }
+          self.$broadcast("getIptVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          if(self.accounterrmsg || self.pwderrmsg || self.piccodeerrmsg){  // 前端校验
+            self.errmsg = (self.accounterrmsg || self.pwderrmsg || self.piccodeerrmsg);
+            return false;
+          } 
           var data = {
               email: this.user.account,
               passwd: Utils.geta(this.user.pwd),
@@ -131,6 +138,7 @@ export default {
               }
               self.needpiccode && self.$broadcast("updatePiccode");
               (res.code === 'P00117') && (++self.pwdErrorCount >= 2); // 密码错误三次以上显示找回密码弹框
+              Pingback.errLogger(res.code, 'login');
           });
       },
   }  

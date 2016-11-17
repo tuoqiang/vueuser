@@ -1,12 +1,12 @@
 <template>
 	<div id="form-group-1" class="form-group form-bortop">
 		<div class="form-group-in j_err_iconbox" id="j_l_zh">
-			<label for="email" class="label-email label-piccode">帐&nbsp;&nbsp;&nbsp;&nbsp;号：</label>
+			<label for="email" class="label-email label-piccode">{{labelname}}</label>
 			<input 	type="email" 
 					class="form-control form-control-email form-control-w" 
 					id="email" 
 					name="email" 
-					placeholder="手机号/邮箱" 
+					:placeholder="iptplaceholder" 
 					value="{{ localaccount || account }}" 
 					v-model="account" 
 					
@@ -21,13 +21,22 @@
 
 
 <script>
+
+import Utils from 'assets/js/utils.js'
+
 module.exports = {
   props:{
-  		localaccount:''
+  		localaccount:'',
+      ismustphone:false, // 是否必填
+      iptplaceholder:'',
+      labelname:'',
+      ismustemail:false,
+      format:''
   },
   data() {
     return {
-      account:''
+      account:'',
+      errormsg:'',
     }
   },
   methods: {
@@ -37,9 +46,11 @@ module.exports = {
     }
   },
   events: {
-    'loginAction': function(msg){
-		this.$dispatch('child-account', this.account || this.localaccount)
-  	}
+    'getIptVal': function(msg){
+      this.errormsg = Utils.getCheckAccountErrMsg(( this.account || this.localaccount ), this.format);
+      this.$dispatch('child-account-check', this.errormsg);
+		  this.$dispatch('child-account', this.account || this.localaccount); 
+  	},
   }
 }
 </script>
