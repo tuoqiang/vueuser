@@ -6,7 +6,6 @@
 
 <script>
 
-import Lib from 'assets/Lib.js'
 
 module.exports = {
 	components:{

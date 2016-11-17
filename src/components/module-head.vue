@@ -9,9 +9,6 @@
 </template>
 
 <script>
-
-import Lib from 'assets/Lib.js'
-
 module.exports = {
   props:{
   	"title":{
