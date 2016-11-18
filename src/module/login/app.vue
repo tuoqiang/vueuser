@@ -111,7 +111,9 @@ export default {
       //登陆操作
       loginAction(){
           var self = this;
-          self.$broadcast("getIptVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          self.$broadcast("getAccountVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          self.$broadcast("getPwdVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          self.$broadcast("getPiccodeVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
           if(self.accounterrmsg || self.pwderrmsg || self.piccodeerrmsg){  // 前端校验
             self.errmsg = (self.accounterrmsg || self.pwderrmsg || self.piccodeerrmsg);
             return false;

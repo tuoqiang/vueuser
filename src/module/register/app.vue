@@ -146,7 +146,8 @@ export default {
       //登陆操作
       getPhoneCode(){
           var self = this;
-          this.$broadcast("getIptVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          self.$broadcast("getAccountVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          self.$broadcast("getPiccodeVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
           if(Utils.submitingFlag) {
               self.errmsg='请求中，稍后再试！';
               return false;
@@ -173,7 +174,7 @@ export default {
       },
       sendPhoneCode(){
           var self = this;
-          this.$broadcast("getIptVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          this.$broadcast("getPhonecodeVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
           if(Utils.submitingFlag) {
               self.errmsg='请求中，稍后再试！';
               return false;
@@ -197,7 +198,16 @@ export default {
       },
       regist(){
           var self = this;
-          this.$broadcast("getIptVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          this.$broadcast("getPwdVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          if(self.pwderrmsg){  // 前端校验
+              self.errmsg = self.pwderrmsg;
+              return false;
+          } 
+          this.$broadcast("getCompwdVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          if(self.compwderrmsg){  // 前端校验
+              self.errmsg = self.compwderrmsg;
+              return false;
+          } 
           if(Utils.submitingFlag) {
               self.errmsg='请求中，稍后再试！';
               return false;

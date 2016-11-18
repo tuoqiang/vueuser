@@ -181,9 +181,21 @@ var Rxports = {
 		});	
 	},
 
-	sendFpwdRequest: function(currVue, data){
+	saveFpwdRequest: function(currVue, data){
 		return new Promise(function (resolve, reject) {
 			Server.resetPasswd(currVue, data).then(function(res) {					// 手机验证码正确，可以注册
+				console.log('h5_moble! Server.sendFpwRequest success');
+				resolve(res);
+			}, function(res) {
+				console.log('h5_moble! Server.sendFpwRequest fail');
+				reject(res);
+			});
+		});	
+	},
+
+	saveMpwdRequest: function(currVue, data){
+		return new Promise(function (resolve, reject) {
+			Server.updatePasswd(currVue, data).then(function(res) {					// 手机验证码正确，可以注册
 				console.log('h5_moble! Server.sendFpwRequest success');
 				resolve(res);
 			}, function(res) {
@@ -201,7 +213,7 @@ var Rxports = {
 				antiCsrf: null,
 				type: 16,
 				authcookie: null,
-				redirect: 'http://cms.ptqy.gitv.tv:8083/module/findpwd.html#fpwd?v='+Storage.getSessionStorage(self.URL_PARAMS).av + '&uuid=' + Storage.getSessionStorage(self.URL_PARAMS).ui
+				redirect: data.redirect
 			}).then(function(res) {					// 手机验证码正确，可以注册
 				console.log('h5_moble! Server.findPasswdByEmail success');
 				resolve(res);
@@ -829,6 +841,19 @@ var Rxports = {
 	getEncryptPhone: function (u, i) {
 		return u.substring(0, 3) + '****' + u.substring(i); // 设置用户账户信息
 	},
+
+	/**
+	 * 隐藏邮件中间几位
+	 * @param  {[type]} el [description]
+	 * @return {[type]}    [description]
+	 */
+	getEncryptEamil: function(email) {
+		var before = email.split('@')[0];
+		if(before.length > 4){
+			return before = before.substring(0, 3) + '****@' + email.split('@')[1];
+		}
+		return email;									// 设置用户账户信息
+	},
 									
 	isCellphone: function(cellphone) {
 		return PHONECALL_RG.test(cellphone);
@@ -900,6 +925,17 @@ var Rxports = {
 			clearTimeout(timerId);
 			self.openPageByName(pageName);							// pingback 发送完成打开
 		});
+	},
+
+	// parse url string
+	// =================
+	/**
+	 * 解析当前url中的查询参数
+	 * @return {[type]} [description]
+	 */
+	parseLocationSearch: function() {
+		var s = location.search.substring(1);
+		return this.stringToObj(s, '&', '=');
 	},
 
 	bcd: function(){
