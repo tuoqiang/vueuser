@@ -36,7 +36,7 @@ module.exports = {
   },
 
   events: {
-    'getIptVal': function(){
+    'getPhonecodeVal': function(){
     	this.errormsg = Utils.checkPhonecode(this.phonecode);
       	this.$dispatch('child-phonecode-check', this.errormsg);
     	this.$dispatch('child-phonecode', this.phonecode); 

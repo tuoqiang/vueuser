@@ -28,15 +28,12 @@ module.exports = {
   methods: {
   	'sendemailagain'(){
   		if(this.disableBtnTime > 0){ return false;}
-  		console.log('子组件的sendemailagain')
   		this.$dispatch('send-email-again');
   	},
   },
   events: {
-    'getIptVal': function(){
-    	this.errormsg = Utils.checkPhonecode(this.phonecode);
-      	this.$dispatch('child-phonecode-check', this.errormsg);
-    	this.$dispatch('child-phonecode', this.phonecode); 
+    'a': function(){
+    	
     },
     'startEmailCountdown': function(){
     	var self = this;

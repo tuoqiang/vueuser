@@ -148,6 +148,13 @@ var Rxports = {
 	findPasswdByEmail: function(currVue, opts) {
 		return this.fetchData('apis/secure/send_verify_email.action',currVue, opts);
 	},
+
+	/**
+	 * 修改密码
+	 */
+	updatePasswd: function(currVue, opts) {
+		return this.fetchData('apis/user/reset_passwd.action',currVue, opts);
+	},
 	
 }
 	

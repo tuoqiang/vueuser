@@ -7,14 +7,15 @@
 					id="email" 
 					name="email" 
 					:placeholder="iptplaceholder" 
-					value="{{ localaccount || account }}" 
+					value="{{ readonlyaccount || localaccount || account }}" 
 					v-model="account" 
-					
+					:readonly="readonly"
 					/>
 			<i 		class="icon icon01 icon-delete" 
 					id="j-btn-clearInput" 
 					v-show="account || localaccount" 
-					@click=clearIpt></i>
+					@click=clearIpt
+          v-if='!readonlyaccount'></i>
 		</div>
 	</div>
 </template>
@@ -31,7 +32,9 @@ module.exports = {
       iptplaceholder:'',
       labelname:'',
       ismustemail:false,
-      format:''
+      format:'',
+      readonly:'',
+      readonlyaccount:'',
   },
   data() {
     return {
@@ -46,7 +49,7 @@ module.exports = {
     }
   },
   events: {
-    'getIptVal': function(msg){
+    'getAccountVal': function(msg){
       this.errormsg = Utils.getCheckAccountErrMsg(( this.account || this.localaccount ), this.format);
       this.$dispatch('child-account-check', this.errormsg);
 		  this.$dispatch('child-account', this.account || this.localaccount); 

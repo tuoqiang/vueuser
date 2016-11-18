@@ -41,7 +41,7 @@ module.exports = {
     }
   },
   events: {
-    'getIptVal': function(){
+    'getPiccodeVal': function(){
     	if(!this.piccode && this.needpiccode){ 
         this.errormsg='图文验证码不能为空';
     	}else{

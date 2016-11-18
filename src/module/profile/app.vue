@@ -136,6 +136,7 @@ export default {
   },
   ready: function(){
   	  console.log('ready run')
+      Utils.setEvents();
   },
   methods: {
       //登陆操作

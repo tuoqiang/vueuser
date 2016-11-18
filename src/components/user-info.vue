@@ -1,6 +1,6 @@
 <template>
   <div>
-      <a @click="gotoSettting" href="javascript:;" class="userinfo" >
+      <a  href="javascript:;" :data-href="PB.href" :data-click="PB.click" :data-block="PB.block"  class="userinfo j-pb-click" >
         <p class="user-name user-status color-01" id="j-username">{{username}}</p>
         <p class="user-status color-01 user-hidetxt" id="j-userstatus">{{userstatus}}</p>
         <i class="arrow-r vertical-center"></i>
@@ -30,9 +30,6 @@ module.exports = {
      
   },
   methods: {
-      gotoSettting: function(){
-          Utils.delayOpenPage(this.PB.href, {click: this.PB.click, block: this.PB.block});
-      }
   },
   
 }

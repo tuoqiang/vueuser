@@ -2,7 +2,7 @@
   	<topbar text="安全中心" :isvip="isvip"></topbar>
     <error-msg v-bind:errmsg='errmsg' v-show="errmsg"></error-msg>
     <div class="btn-w-out btn-w-mt btn-w-bortop">
-      <button-common-a @click="gotoModPwd" btntext="修改密码" btnclass="btn-mdfpwd" :datahref="modpwdhref"></button-common-a>
+      <button-common-a  btntext="修改密码" btnclass="btn-mdfpwd" :datahref="modpwdhref"></button-common-a>
     </div>
     <div class="btn-w-out btn-w-borbot">
       <button-common-a @click="gotoBind" :btntext="bind.btnname" btnclass="btn-mdfpwd" :datahref="bind.datahref"></button-common-a>
@@ -64,7 +64,8 @@ export default {
       });
   },
   ready: function(){
-  	  console.log('ready run')
+  	  console.log('ready run');
+      Utils.setEvents();
   },
   methods: {
       //登陆操作
@@ -90,14 +91,10 @@ export default {
               break;  
           }
       },
-      gotoModPwd: function(){
-        console.log('h5_moble! gotoModPwd() run');
-        Utils.delayOpenPage(this.modpwdhref, {});
-      } 
   },
   events: {
     'showActBox': function(){
-      console.log('showActBox run111111111111111111111111111111111111111111111111111111111111');
+      console.log('showActBox run');
       
         if(this.isvipact.act == 1){                    // isvipac可能取值0:没有权益;  1:有权益未激活。
           console.log('showActBox =' + this.isvipact.act);

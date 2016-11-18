@@ -40,7 +40,7 @@ module.exports = {
     }
   },
   events: {
-    'getIptVal': function(){
+    'getPwdVal': function(){
     	if(!this.pwd){ 
           this.errormsg='密码不能为空';
       	}else{
