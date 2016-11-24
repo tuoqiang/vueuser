@@ -6,10 +6,7 @@
 <script>
 module.exports = {
   props:{
-  	"text":{
-  		type:String,
-  		default:""
-  	}
+  	'text':'',
   }
 }
 </script>

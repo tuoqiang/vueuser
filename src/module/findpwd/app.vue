@@ -1,6 +1,6 @@
 <template>
   	<topbar text="找回密码"></topbar>
-    <error-msg v-bind:errmsg='errmsg' v-show="errmsg"></error-msg>
+    <error-msg :errmsg='errmsg' v-if="errmsg"></error-msg>
   	<form class="container form-container" action="#" autocomplete="off" id="j-form" style="margin-top:0.25rem;">
       <!-- 手机或邮箱找回密码标题 -->
       <div v-if="hash == 'findex'">
@@ -18,7 +18,7 @@
       </div>
 
       <!-- 手机找回密码第一步 -->
-      <div v-if="hash == 'fphone'" style="height:1.84rem;">
+      <div v-if="hash == 'fphone'" class="hgt2">
         <process-step firstttext="手机号" processclass="pwd-title-step1"></process-step>
         <form-account iptplaceholder="请输入手机号" labelname="手机号：" format="phone" ></form-account>
         <form-piccode :needpiccode="true" ></form-piccode>
@@ -26,14 +26,14 @@
       </div>
 
       <!-- 手机找回密码第二步 -->
-      <div v-show="hash == 'fcode'" style="height:1.84rem;">
+      <div v-show="hash == 'fcode'" class="hgt2">
         <process-step if="手机号" processclass="pwd-title-step2"></process-step>
-        <phonecode :phonenum="user.account" datahref="findpwd.html#fphone"></phonecode>
-        <button-common @click="sendPhoneCode" btnclass="btn-primary form_btnpos01" btntext="立即验证"></button-common>  
+        <phonecode :phone="user.account" regethref="findpwd.html#fphone" phonetxtclass="form-phonetxt2" iptclass="form-group-mt03"></phonecode>
+        <button-common @click="verifyPhoneCode" btnclass="btn-primary form_btnpos01" btntext="立即验证"></button-common>  
       </div>
 
       <!-- 手机-邮箱找回密码第三步 -->
-      <div v-if="hash == 'fpwd'" style="height:1.84rem;">
+      <div v-if="hash == 'fpwd'" class="hgt2">
         <process-step firstttext="手机号" processclass="pwd-title-step3"></process-step>
         <form-pwd fatherclass="form-bortop" labelname="密码：" iptplaceholder="8-20位字母、数字或字符的组合" modelpwd="pwd"></form-pwd>
         <form-pwd fatherclass="form-group-bt" fatherinclass="form-group-in-nnobor" labelname="确认密码：" iptplaceholder="请再次输入密码"  modelpwd="compwd"></form-pwd> 
@@ -41,14 +41,14 @@
       </div>
 
       <!-- 邮箱找回密码第一步 -->
-      <div v-if="hash == 'femail'" style="height:1.84rem;">
+      <div v-if="hash == 'femail'" class="hgt2">
         <process-step firstttext="邮箱地址" processclass="pwd-title-step1"></process-step>
         <form-account iptplaceholder="请输入邮箱" labelname="邮&nbsp;&nbsp;箱：" format="email"></form-account>
         <button-common @click="sendEmail" btnclass="btn-primary form_btnpos01" btntext="发送验证信息"></button-common>  
       </div>
 
       <!-- 邮箱找回密码第二步 -->
-      <div  v-show="hash == 'femailr'" style="height:1.84rem;">
+      <div  v-show="hash == 'femailr'" class="hgt2">
         <process-step firstttext="邮箱地址" processclass="pwd-title-step2"></process-step>
         <email-counter :email="user.account"></email-counter>
         <button-common  @click="fpwd" btnclass="btn-primary form_btnpos01" btntext="立即进入邮箱" :datahref="gointoemailurl"></button-common>  
@@ -70,7 +70,6 @@ import ButtonCommon from 'components/button-common'
 import ErrorMsg from 'components/error-msg'
 import Topbar from 'components/topbar'
 import ProcessStep from 'components/process-step'
-import LoginTips from 'components/login-tips'
 import FormAccount from 'components/form-account'
 import FormPwd from 'components/form-pwd'
 import FormPiccode from 'components/form-piccode'
@@ -88,16 +87,16 @@ export default {
               piccode: '',
               phonecode:'',
           },
+          errMsg:{
+              accounterrmsg:'',          // 账号错误文案
+              piccodeerrmsg:'',            // 图文验证码错误文案
+              phonecodeerrmsg:'',            // 6位短信验证码错误文案
+              pwderrmsg:'',            // 密码错误文案
+              compwderrmsg:'' ,             // 确认密码错误文案
+          },
           hash:'',                 // 当前hash值
         	errmsg: '',              // 错误文案
-          needpiccode: false,      // 需要piccode标志位
           errorpage:'',           // 登录失败页面文案
-          ismustphone: true,
-          accounterrmsg:'',          // 账号错误文案
-          piccodeerrmsg:'',            // 图文验证码错误文案
-          phonecodeerrmsg:'',            // 6位短信验证码错误文案
-          pwderrmsg:'',            // 密码错误文案
-          compwderrmsg:'' ,             // 确认密码错误文案
           resetpwdToken:'',      // cookie P00014的值，通过验证手机验证码或者验证邮箱通过后种上。
           gointoemailurl:''          // 立即进入邮箱链接
       }
@@ -106,7 +105,6 @@ export default {
     	ButtonCommon,
       ButtonCommonA,
     	Topbar,
-    	LoginTips,
     	FormAccount,
     	FormPiccode,
       ErrorMsg,
@@ -118,13 +116,19 @@ export default {
   },
   events: {
       'child-account-check': function (errormsg) {
-          this.accounterrmsg = errormsg;
+          this.errMsg.accounterrmsg = errormsg;
       },
       'child-piccode-check': function (errormsg) {
-          this.piccodeerrmsg = errormsg;
+          this.errMsg.piccodeerrmsg = errormsg;
       },
       'child-phonecode-check': function (errormsg) {
-          this.phonecodeerrmsg = errormsg;
+          this.errMsg.phonecodeerrmsg = errormsg;
+      },
+      'child-pwd-check': function (errormsg) {
+          this.errMsg.pwderrmsg = errormsg;
+      },
+      'child-compwd-check': function (errormsg) {
+          this.errMsg.compwderrmsg = errormsg;
       },
       'child-account': function (account) {
           this.user.account = account;
@@ -135,78 +139,30 @@ export default {
       'child-phonecode': function(phonecode){
           this.user.phonecode = phonecode;
       },
-      'child-pwd-check': function (errormsg) {
-          this.pwderrmsg = errormsg;
-      },
-      'child-compwd-check': function (errormsg) {
-          this.compwderrmsg = errormsg;
-      },
       'child-pwd': function(pwd){
           this.user.pwd = pwd;
       },
       'child-compwd': function(compwd){
           this.user.compwd = compwd;
       },
-      'send-email-again': function(){ // 重新发送验证邮件
+      'send-email-again': function(){   // 重新发送验证邮件事件，在email-counter中触发
           this.sendEmail();
       },
   },
   created: function () {
       console.log('created run');
-      !location.hash && (location.hash = '#findex'); // 默认打开注册第一步
-      
-
-      var searchstr = location.hash;
-      var curHash = ''; 
-      var vStr = '';
-
-      if(searchstr.indexOf('?') !== -1){
-        curHash = location.hash.split('?')[0];
-        vStr = location.hash.split('?')[1];
-      }else{
-        curHash = location.hash;
-      }
-      console.log('curHash=' + curHash);
-      this.hash = curHash.replace('#','');
-      
-      if(curHash == '#findex'){
-        Pingback.pageLoaded();                    // 展示pingback: 忘记密码首页
-      }
-      if(curHash == '#fpwd'){
-        if(!!vStr){
-          var obj = Utils.stringToObj(vStr, '&', '=');
-          localStorage.setItem('versionApk', obj.v); //  把apk版本号记录到本地储存，为修改忘记密码第三步用*/
-        }
-        this.resetpwdToken = Storage.getRstPwdToken();        // hash为fpwd时，获取P00014值，cookie P00014的值，验证邮箱通过后种上。
-        console.log("this.resetpwdToken= " +this.resetpwdToken)
-        Pingback.pageLoaded('reset');               // 展示pingback: 忘记密码-通过邮箱操作第三步页面
-      }
-      if(curHash == '#femailr'){
-        if(!!localStorage.getItem('h5_modifyPwd_byemail')){
-          /*$btnEmailFemailr.attr('data-href',localStorage.getItem('h5_modifyPwd_byemail'));
-          $('#emailtext').html(localStorage.getItem('h5_modifyPwd_email'));*/
-        }
-      }
+      Utils.setPageHash(this, 'findpwd', location.hash);
   },
   ready: function(){
     var self = this;
     var hashChangeCallback = function(){
         console.log('h5_moble! onhashchange come in');
-        var curHash = location.hash; 
-        self.hash = curHash.replace('#','');
-        $('body').scrollTop(0);
-       
-        if(curHash === '#fphone'){ // 只有在rphone页才会重新获取图文验证码
-          clearInterval(Utils.codeTimerId);
-          Utils.codeTimerId = null;       // 清除验证码60s定时器
-          self.$broadcast("updatePiccode");
-        }
+        Utils.setPageHash(self, 'findpwd', location.hash);
+        Utils.setHashChangeCallback(self, 'findpwd', location.hash);
     }
-
     Utils.bindHashChange(hashChangeCallback);  // 绑定hash值变化时的回调函数
     Utils.setEvents();
     Pingback.init('retrieve');
-    
   },
   methods: {
       gotoFPwdByPhone(){
@@ -217,126 +173,82 @@ export default {
         location.hash = 'femail';
         Pingback.pageLoaded('mail');              // 展示pingback: 邮箱找回密码第一步页面
       },
-
-      //登陆操作
       getPhoneCode(){
           var self = this;
           self.$broadcast("getAccountVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
           self.$broadcast("getPiccodeVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
-          if(Utils.submitingFlag) {
-              self.errmsg='请求中，稍后再试！';
-              return false;
-          }
-          if(self.accounterrmsg || self.piccodeerrmsg){  // 前端校验
-            self.errmsg = (self.accounterrmsg || self.piccodeerrmsg);
-            return false;
-          } 
+          self.errmsg = (self.errMsg.accounterrmsg || self.errMsg.piccodeerrmsg);
+          if(self.errmsg){ return false;}  // 前端校验
           var data = {
-              account: this.user.account,
-              piccode: this.user.piccode
+              account: self.user.account,
+              piccode: self.user.piccode
           };
-          Utils.submitingFlag = true;
-          Utils.phonecodeHandler(self, data, Utils.REQUEST_FINDPWD).then(function(){
-              Utils.submitingFlag = false;
+          Utils.getPhonecode(self, data, Utils.REQUEST_FINDPWD).then(function(){
               location.hash = "fcode";
               self.$broadcast("startCountdown");
           },function(res){
-              Utils.submitingFlag = false;
               self.errmsg= Utils.showErrorMsg(res);
-              self.isRegistered = (res.code === 'P00404');
-              (res.code === 'P00107') && self.$broadcast("updatePiccode");
+              self.$broadcast("updatePiccode");
           });
       },
-      sendPhoneCode(){
+      verifyPhoneCode(){
           var self = this;
-          this.$broadcast("getPhonecodeVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
-          if(Utils.submitingFlag) {
-              self.errmsg='请求中，稍后再试！';
-              return false;
-          }
-          if(self.phonecodeerrmsg){  // 前端校验
-              self.errmsg = self.phonecodeerrmsg;
-              return false;
-          } 
+          self.$broadcast("getPhonecodeVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          self.errmsg = self.errMsg.phonecodeerrmsg;
+          if(self.errmsg){ return false;}  // 前端校验
           var data = {
-              account: this.user.account,
-              phonecode: this.user.phonecode
+              account: self.user.account,
+              phonecode: self.user.phonecode
           };
-          Utils.submitingFlag = true;
           Utils.phoneCodeVerify(self, data, Utils.REQUEST_FINDPWD).then(function(res){
-              Utils.submitingFlag = false;
               self.resetpwdToken = Storage.getRstPwdToken();      // cookie P00014的值，通过验证手机验证码或者验证邮箱通过后种上。
               location.hash = "fpwd";
           },function(res){
-              Utils.submitingFlag = false;
               self.errmsg= Utils.showErrorMsg(res);
           });
       },
       fpwd(){
           var self = this;
-          this.$broadcast("getPwdVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
-          if(self.pwderrmsg){  // 前端校验
-              self.errmsg = self.pwderrmsg;
-              return false;
-          } 
-          this.$broadcast("getCompwdVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
-          if(self.compwderrmsg){  // 前端校验
-              self.errmsg = self.compwderrmsg;
-              return false;
-          } 
-          if(Utils.submitingFlag) {
-              self.errmsg='请求中，稍后再试！';
-              return false;
-          }
-          if(this.user.pwd != this.user.compwd){
+          self.$broadcast("getPwdVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          self.errmsg = self.errMsg.pwderrmsg;
+          if(self.errmsg){ return false;}  // 前端校验
+          self.$broadcast("getCompwdVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          self.errmsg = self.errMsg.compwderrmsg;
+          if(self.errmsg){ return false;}  // 前端校验
+          if(self.user.pwd != self.user.compwd){
               self.errmsg = '新密码两次输入不相同';
               return false;
           }
-          if(self.pwderrmsg || self.compwderrmsg){  // 前端校验
-              self.errmsg = (self.pwderrmsg || self.compwderrmsg);
-              return false;
-          } 
           var data = {
               newpass: self.user.pwd,
               token: self.resetpwdToken
           };
-          Utils.submitingFlag = true;
-
           Utils.saveFpwdRequest(self, data).then(function(res){
-              Utils.submitingFlag = false;
               Utils.confirmTokenLogin(self,  Utils.BEHAVIOR_FINDPWD).then(function(suc){}, function(fail){   
-                self.errorpage = Utils.tokenError[Utils.getScene(Utils.BEHAVIOR_FINDPWD)]// 如果存在redirectUrl，则token失效继续跳转走后面的逻辑                              
+                self.errorpagetex = Utils.tokenError.findpwd// 如果存在redirectUrl，则token失效继续跳转走后面的逻辑                            
               });
           },function(res){
-              Utils.submitingFlag = false;
               self.errmsg= Utils.showErrorMsg(res);
           });
       },
       sendEmail(){
           var self = this;
-          this.$broadcast("getAccountVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
-          if(Utils.submitingFlag) {
-              self.errmsg='请求中，稍后再试！';
-              return false;
-          }
-          if(self.accounterrmsg){  // 前端校验
-            self.errmsg = self.accounterrmsg;
-            return false;
-          }
+          self.$broadcast("getAccountVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
+          self.errmsg = self.errMsg.accounterrmsg;
+          if(self.errmsg){ return false;}  // 前端校验
           var data = {
               email: self.user.account,
-              redirect: 'http://cms.ptqy.gitv.tv:8083/module/findpwd.html#fpwd?v='+Storage.getSessionStorage(Utils.URL_PARAMS).av + '&uuid=' + Storage.getSessionStorage(Utils.URL_PARAMS).ui
+              redirect: Utils.PAGEDOMAIN + 'findpwd.html#fpwd?v='+Storage.getSessionStorage(Utils.URL_PARAMS).av + '&uuid=' + Storage.getSessionStorage(Utils.URL_PARAMS).ui,
+              type: 16,
+              authcookie: null,
           };
-          Utils.submitingFlag = true;
           Utils.sendEmailRequest(self, data).then(function(res){
-              Utils.submitingFlag = false;
               self.$broadcast("startEmailCountdown");
               self.gointoemailurl = 'http://mail.' + self.user.account.split('@')[1];
               location.hash = "femailr";
               localStorage.setItem('h5_modifyPwd_byemail', 'http://mail.' + self.user.account.split('@')[1]);
               localStorage.setItem('h5_modifyPwd_email', self.user.account); //待： 把邮箱种到本地存储中：作用 当点击立即进入邮箱按钮进入邮箱登录页再返回时，页面中的邮箱已被清空，此时从缓存中读取刚才输入的邮箱
           },function(res){
-              Utils.submitingFlag = false;
               self.errmsg= Utils.showErrorMsg(res);
           });
       },

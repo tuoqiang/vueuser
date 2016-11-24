@@ -5,12 +5,10 @@ import Storage from 'assets/js/storage';
 import Server from 'assets/js/server';
 
 var TIMEOUT_GO = 500;			// 设置页面最迟跳转时间
-
 var SERVICE_ID = 2;				// 服务类型，mobile填1，web填2，帕帕奇填3
 var PHONECALL_RG = /^1[0-9]\d{9}$/;
 var EMAIL_RG = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
 var PASSWORD_RG = /^[A-Za-z0-9_~!@#$%^&*()_+=|<>,.{}:;\]\[-\\\/?"']{8,20}$/;
-var CONFIGURL = 'http://static.ptqy.gitv.tv/tv/common/utils/config.js';;
 var tapType = ('ontouchend' in window) ? 'touchend' : 'click';			// 确定用户单击操作时的类型
 var tvVersionLine = 5.3; 		// 荔枝套餐和白金套餐分界版本
 var packagePid = 'adb3376b039b970b'		// 套餐类型， 默认是白金套餐  白金‘adb3376b039b970b’;荔枝'9ff1a15abb9b50b8'
@@ -21,8 +19,6 @@ var proText = {
 	'protype34' : '密码找回成功',
 	'protype10' : '手机号绑定成功'
 };
-
-
 
 // user_type
 var NO_VIP_MEMBER 			= 0			// 不是会员
@@ -47,7 +43,7 @@ var PB_BEHAVIOR_BIND		= 10		// 绑定手机号
 // 数据统计常量
 var SCENE_LOGIN		= 'login'			// 登录
 var SCENE_REGISTER 	= 'register'		// 注册
-var SCENE_FINDPWD	= 'resetpwd'		// 找回密码
+var SCENE_FINDPWD	= 'findpwd'		// 找回密码
 var SCENE_MODPWD	= 'modpwd'		// 修改密码
 var SCENE_BIND		= 'bind'		// 绑定手机号
 
@@ -60,9 +56,10 @@ Rxports.BEHAVIOR_BIND		= 5		// 绑定手机号*/
 
 
 var Rxports = {
+	PAGEDOMAIN:'http://cms.ptqy.gitv.tv:8083/module/',	// 
+	//PAGEDOMAIN:'http://cms.ptqy.gitv.tv/common/tv/user/',	//
 	emailTimerId:null,	// 邮箱验证码60s定时器
 	codeTimerId:null, // 短信验证码60s定时器
-	submitingFlag: false,
 	URL_PARAMS: 'urlParams',
 	BEHAVIOR_LOGIN		: 1 ,			// 登录
 	BEHAVIOR_REGISTER 	: 2	,	// 注册
@@ -71,55 +68,34 @@ var Rxports = {
 	BEHAVIOR_BIND		: 5	,	// 绑定手机号
 	REQUEST_REGISTER: 1,
 	REQUEST_FINDPWD: 2,
+	REQUEST_MODPWD: 6,
+	REQUEST_BIND: 3,
+	REQUEST_CHANGEPHONE: 5,
+	REQUEST_CHANGESAVEPHONE: 4,
 	tokenError: {
 		login: '暂未登录成功<br>请重新扫码登录',
 		register: '注册已完成<br>请重新扫码登录',
-		resetpwd: '已重置密码<br>请重新扫码登录'
+		findpwd: '已重置密码<br>请重新扫码登录'
 	},
 	/**
 	 * 获取手机验证码
 	 * @param  {[type]} el [description]
 	 * @return {[type]}    [description]
 	 */
-	phonecodeHandler: function(currVue, data, requestType, authcookie) {
-		console.log('h5_moble! phonecodeHandler() come in');
-		var self = this;
-		return new Promise(function (resolve, reject) {
-			self.sendPhonecode(currVue, data, requestType, authcookie)
-			.then(function(res){
-				console.log("h5_moble! Utils.sendPhonecode success");
-				resolve(res);	
-				/*var usernameId = (pagetype === 'bpthird') ? 'cellphoneNumSecond' : 'cellphoneNum';
-				setUsername(data.account, 7, usernameId);*/
-			},function(res) {
-				console.log("h5_moble! Utils.sendPhonecode fail");
-				if(res.code === 'P00404' || res.code === 'P00108'){  							// 108-户不存在; 404-用户已注册--单独发错误日志
-					//Pingback.errLogger(e.code, getErrPbBlock());
-				}
-				if(requestType == 1 && res.code === 'P00404'){								// 手机号已经被注册时，显示忘记密码链接
-					//Pingback.pageLoaded('forgot');
-				}
-				reject(res);
-			});
-		});	
-	},
-	sendPhonecode: function (currVue, data, requestType, authcookie) {
+	getPhonecode: function(currVue, data, requestType, authcookie) {
 		var self = this;
 		return new Promise(function (resolve, reject) {
 			Server.checkAccount(currVue, { account: data.account }).then(function(res) {
-				console.log("h5_moble! Server.checkAccount check success");
+				console.log("Server.checkAccount success");
 				// res: true 注册过，false 未注册过
 				// res: 有时会出现对象的情况，所以要明确res的值
 				if(requestType === 1 && (res === true)) {				// 手机号已经被注册过
-					//Utils.clearCodeTimer($el);
 					reject({ code: 'P00404', errType:'manual' });		// P00404手机号已经被注册
 				}else if(requestType === 2 && (res === false)) {		// 找回密码的用户不存在
-					//Utils.showErrorMsg({ code: 'P00108', errType:'manual'  });
-					//Utils.clearCodeTimer($el);
 					reject({ code: 'P00108' });
 				}else {
 					// 向手机发送验证码
-					Server.sendPhonecode(currVue, {
+					Server.verifyPhoneCode(currVue, {
 							requestType: requestType,
 							cellphoneNumber: data.account,
 							vcode: data.piccode,
@@ -127,26 +103,25 @@ var Rxports = {
 							authcookie: authcookie
 						}
 					).then(function(res){
-						console.log("h5_moble! Server.sendPhonecode success");
+						console.log("Server.verifyPhoneCode success");
 						resolve(res);	
-					}, function(e) {
-						console.log("h5_moble! Server.sendPhonecode fail");
-						reject(e);
+					}, function(res) {
+						console.log("Server.verifyPhoneCode fail");
+						reject(res);
 					});
 				}
-			}, function(e) {
-				console.log("h5_moble! Server.checkAccount check success");
-				reject(e);
+			}, function(res) {
+				console.log("Server.checkAccount fail");
+				reject(res);
 			});
 		});	
 	},
-
 	/**
 	 * 验证手机验证码
 	 * @param  {[type]} el [description]
 	 * @return {[type]}    [description]
 	 */
-	phoneCodeVerify: function(currVue, data, requestType, authcookie) {
+	verifyPhoneCode: function(currVue, data, requestType, authcookie) {
 		return new Promise(function (resolve, reject) {
 			Server.phoneCodeVerify(currVue, {
 				authCode: data.phonecode,
@@ -154,11 +129,11 @@ var Rxports = {
 				requestType: requestType,
 				serviceId: SERVICE_ID,
 				authcookie: authcookie
-			}).then(function(res) {					// 手机验证码正确，可以注册
-				console.log('h5_moble! Server.phoneCodeVerify check success');
+			}).then(function(res) {					
+				console.log('Server.phoneCodeVerify success');
 				resolve(res);
 			}, function(res) {
-				console.log('h5_moble! Server.phoneCodeVerify check fail');
+				console.log('Server.phoneCodeVerify fail');
 				reject(res);
 			});
 		});	
@@ -171,11 +146,11 @@ var Rxports = {
 				password: data.pwd,
 				authCode: data.phonecode,
 				serviceId: SERVICE_ID
-			}).then(function(res) {					// 手机验证码正确，可以注册
-				console.log('h5_moble! Server.phoneCodeVerify check success');
+			}).then(function(res) {					
+				console.log('Server.phoneRegister success');
 				resolve(res);
 			}, function(res) {
-				console.log('h5_moble! Server.phoneCodeVerify check fail');
+				console.log('Server.phoneRegister fail');
 				reject(res);
 			});
 		});	
@@ -183,11 +158,11 @@ var Rxports = {
 
 	saveFpwdRequest: function(currVue, data){
 		return new Promise(function (resolve, reject) {
-			Server.resetPasswd(currVue, data).then(function(res) {					// 手机验证码正确，可以注册
-				console.log('h5_moble! Server.sendFpwRequest success');
+			Server.resetPasswd(currVue, data).then(function(res) {					
+				console.log('Server.sendFpwRequest success');
 				resolve(res);
 			}, function(res) {
-				console.log('h5_moble! Server.sendFpwRequest fail');
+				console.log('Server.sendFpwRequest fail');
 				reject(res);
 			});
 		});	
@@ -195,11 +170,11 @@ var Rxports = {
 
 	saveMpwdRequest: function(currVue, data){
 		return new Promise(function (resolve, reject) {
-			Server.updatePasswd(currVue, data).then(function(res) {					// 手机验证码正确，可以注册
-				console.log('h5_moble! Server.sendFpwRequest success');
+			Server.updatePasswd(currVue, data).then(function(res) {					
+				console.log('Server.saveMpwdRequest success');
 				resolve(res);
 			}, function(res) {
-				console.log('h5_moble! Server.sendFpwRequest fail');
+				console.log('Server.saveMpwdRequest fail');
 				reject(res);
 			});
 		});	
@@ -211,14 +186,53 @@ var Rxports = {
 			Server.findPasswdByEmail(currVue, {
 				email: data.email,
 				antiCsrf: null,
-				type: 16,
-				authcookie: null,
+				type: data.type,
+				authcookie: data.authcookie,
 				redirect: data.redirect
-			}).then(function(res) {					// 手机验证码正确，可以注册
-				console.log('h5_moble! Server.findPasswdByEmail success');
+			}).then(function(res) {					
+				console.log('Server.sendEmailRequest success');
 				resolve(res);
 			}, function(res) {
-				console.log('h5_moble! Server.findPasswdByEmail fail');
+				console.log('Server.sendEmailRequest fail');
+				reject(res);
+			});
+		});	
+	},
+
+	sendBindRequest: function(currVue, data){
+		var self = this;
+		return new Promise(function (resolve, reject) {
+			Server.bindphone(currVue, data).then(function(res) {					
+				console.log('Server.sendBindRequest success');
+				resolve(res);
+			}, function(res) {
+				console.log('Server.sendBindRequest fail');
+				reject(res);
+			});
+		});	
+	},
+
+	bindaccount: function(currVue, data){
+		var self = this;
+		return new Promise(function (resolve, reject) {
+			Server.bindaccount(currVue, data).then(function(res) {					
+				console.log('Server.bindaccount success');
+				resolve(res);
+			}, function(res) {
+				console.log('Server.bindaccount fail');
+				reject(res);
+			});
+		});	
+	},
+
+	replacPhone: function(currVue, data){
+		var self = this;
+		return new Promise(function (resolve, reject) {
+			Server.replacPhone(currVue, data).then(function(res) {					
+				console.log('Server.replacPhone success');
+				resolve(res);
+			}, function(res) {
+				console.log('Server.replacPhone fail');
 				reject(res);
 			});
 		});	
@@ -242,15 +256,14 @@ var Rxports = {
 	getUrlParams: function(){
 		console.log('getUrlParams run')
 		var querystring = location.search.substring(1);
-		console.log('h5_moble!  querystring' + querystring);
-		console.log('h5_moble!  querystring');
+		console.log(' querystring' + querystring);
 		return this.getUrlParamsToObj(querystring);
 	},
 
 	getParamsFromPersionQrcode: function(){
 		var res = null;
 		var querystring = location.search.substring(1);
-		console.log('h5_moble!  querystring' + querystring);
+		console.log(' querystring' + querystring);
 		if(!querystring) return res;
 		res = this.stringToObj(querystring, '&', '=');
 		var extra = res.extra;
@@ -361,15 +374,6 @@ var Rxports = {
 	},
 
 	/**
-	 * 把url参数字符串转换成对象
-	 * @param 
-	 * @return
-	 */
-	/*getUrlParamsToObj: function(querystring){
-		return this.stringToObj(querystring, '&', '=');
-	},*/
-
-	/**
 	 * 把字符串根据规律转换成对象序列
 	 * @param  {[type]} s          有序的字符串
 	 * @param  {[type]} separator1 [description]
@@ -401,14 +405,12 @@ var Rxports = {
 		return cookie;
 	},
 
-	
-
 	/**
 	 * 密码RSA加密
 	 * @param  {[type]} passwd [description]
 	 * @return {[type]}        [description]
 	 */
-	geta: function(passwd) {
+	getRsaVal: function(passwd) {
 		var KEY_MODULUS = 'ab86b6371b5318aaa1d3c9e612a9f1264f372323c8c0f19875b5fc3b3fd3afcc1e5bec527aa94bfa85bffc157e4245aebda05389a5357b75115ac94f074aefcd';
 		var KEY_EXPONENT = '10001';
 		var key = Rsautils.getKeyPair( KEY_EXPONENT, '', KEY_MODULUS );
@@ -419,7 +421,6 @@ var Rxports = {
 		console.log('h5_moble  Utils.confirmTokenLogin run');
 			var _self = this;
 			var urlParams = (self.urlParams || Pingback.getUrlParamsStorage());
-		
 			var scene = _self.getScene(behavior);
 			var block = _self.getBlock(behavior);
 			var pbBehavior = _self.getSceneVal(behavior);
@@ -428,18 +429,17 @@ var Rxports = {
 			Storage.setSessionStorage('proType', pbBehavior);						// 设置个人中心10s文案类别
 			return new Promise(function(resolve, reject){
 				if(urlParams && urlParams.token){
-					
-						Server.confirmTokenLogin(self, {token: urlParams.token, authcookie: cookie}).then(function(res) {	
+					Server.confirmTokenLogin(self, {token: urlParams.token, authcookie: cookie}).then(function(res) {	
+						sendUserBehaviorPb();
+						resolve(res);
+					}, function(res) {
+						if(!!urlParams.redirectUrl){ 									// 如果存在redirectUrl，则token失效继续跳转走后面的逻辑
 							sendUserBehaviorPb();
 							resolve(res);
-						}, function(res) {
-							if(!!urlParams.redirectUrl){ 									// 如果存在redirectUrl，则token失效继续跳转走后面的逻辑
-								sendUserBehaviorPb();
-								resolve(res);
-							}else{
-								reject(res);
-							}
-						});
+						}else{
+							reject(res);
+						}
+					});
 				}else{
 					sendUserBehaviorPb();
 					resolve();
@@ -483,6 +483,7 @@ var Rxports = {
 		var self = this;
 		$('.j-pb-click').on(tapType, function(e) {
 			e.preventDefault();
+			if( self.codeTimerId !== null ) return false;          // 当codeTimerId存在时，不响应.j-pb-click下的任何点击操作
 			self.delayOpenPage($(this))
 		});
 	},
@@ -601,8 +602,6 @@ var Rxports = {
 		return userType;
 	},
 
-	
-
 	isVip: function (userType, ver) {
 		if(ver > tvVersionLine){ 
 			if(	userType === PLATINUM_VIP_MEMBER || // 白金，荔枝白金，纯荔枝，荔枝黄金，荔枝白银是会员
@@ -700,8 +699,6 @@ var Rxports = {
 		console.log('h5_moble!~ profile page s = ' + s);
 		return encodeURIComponent(s);
 	},
-
-	
 
 	/**
 	 * 根据是否是会员返回UI
@@ -810,34 +807,6 @@ var Rxports = {
 		return '';
 	},
 
-	/**
-	 * 注册：检查用户使用的手机号格式
-	 * @param  {string} value 手机号
-	 * @return {boolean}
-	 */
-	checkCellphone: function(data, required) {
-		var value = data['account'];
-		if(this.isEmptyInput(value, '手机号', required)) return false;
-		if(!this.isCellphone(value)) {
-			return false;
-		}
-		return true;
-	},
-
-	/**
-	 * 检查控件的值是否为空
-	 * @param  {string}  value    控件的值
-	 * @param  {string}  hints    控件名
-	 * @return {Boolean}          [description]
-	 */
-	isEmptyInput: function(value, hints, required) {
-		if(!value) {
-			required && this.showErrorMsg( hints + '不能为空！');
-			return true;
-		}
-		return false;
-	},
-
 	getEncryptPhone: function (u, i) {
 		return u.substring(0, 3) + '****' + u.substring(i); // 设置用户账户信息
 	},
@@ -862,21 +831,6 @@ var Rxports = {
 	isEmail:function(email){
 		return EMAIL_RG.test(email);
 	},
-
-	/*注册页验证图文验证码函数*/
-	checkPiccodeInregister: function(inputVal, required) {
-		var arr = ['piccode', 'piccodeold', 'piccodenew'];
-		var value;
-		for(var i = 0; i < arr.length; i++){
-			if(!!inputVal[arr[i]] || inputVal[arr[i]]===''){
-				value = inputVal[arr[i]];
-				break;
-			}
-		}
-		if(this.isEmptyInput(value, '验证码', required)) return false;
-		return true;
-	},
-
 
 	bindHashChange: function(callback){
 		if(/iPhone\sOS.*QQ[^B]/.test(navigator.userAgent)) {
@@ -915,7 +869,6 @@ var Rxports = {
 		var clickBlock = $el.data('block');	
 		var timerId = null;
 		if(pageName) {
-			if( self.codeTimerId !== null ) return false;          // 当codeTimerId存在时，不响应.j-pb-click下的任何点击操作
 			timerId = setTimeout(function() {
 				console.log(pageName + ' timeout!');
 				self.openPageByName(pageName);						// 延迟打开
@@ -938,12 +891,64 @@ var Rxports = {
 		return this.stringToObj(s, '&', '=');
 	},
 
-	bcd: function(){
-		
+	/**
+	 *  返回hash值和url中包含的参数字符串
+	 * @return [hsah, urlParams]
+	 */
+	getHashAndParams: function(){
+		var searchstr = location.hash || location.search;
+		if(searchstr.indexOf('?') !== -1){
+	  		return [searchstr.split('?')[0], searchstr.split('?')[1]];
+	  	}else{
+	  		return [searchstr];
+	  	}
 	},
 
-	bcd: function(){
-		
+	setPageHash: function(curVue, pageType, hashStr){
+		var curHash = ''; 	// hash值
+		var paramsStr = ''; // url中参数字符串
+		if (pageType === 'register') {
+			!hashStr && (location.hash = '#rphone'); // 默认打开注册第一步
+			curHash = location.hash;
+		}else if(pageType === 'findpwd' || pageType === 'modpwd' || pageType === 'bind' || pageType === 'bindbyemail' || pageType === 'changephone'){
+			(pageType === 'findpwd') && !hashStr && (location.hash = '#findex'); // 默认打开找回密码首页
+			(pageType === 'bind') && !hashStr  && (curHash = '#bphone');
+			(pageType === 'bindbyemail') && !hashStr  && (curHash = '#bmemail');
+			(pageType === 'changephone') && !hashStr  && (curHash = '#bpfirst');
+
+			if(hashStr.indexOf('?') !== -1){
+				curHash = location.hash.split('?')[0];
+				paramsStr = location.hash.split('?')[1];
+			}else{
+				curHash = location.hash;
+			}
+			if(curHash == '#findex'){
+		        Pingback.pageLoaded();                    // 展示pingback: 忘记密码首页
+		    }
+			if(curHash == '#fpwd' || curHash == '#mpwd' || curHash === '#bmphone'){
+				if(!!paramsStr){
+					var obj = this.stringToObj(paramsStr, '&', '=');
+					localStorage.setItem('versionApk', obj.v); //  把apk版本号记录到本地储存，为修改忘记密码第三步用*/
+				}
+				curVue.resetpwdToken = Storage.getRstPwdToken();     // hash为fpwd时，获取P00014值，cookie P00014的值，验证邮箱通过后种上。
+				Pingback.pageLoaded('reset');               // 展示pingback: 忘记密码-通过邮箱操作第三步页面
+			}
+			if(curHash === '#bmemail'){
+			    curVue.gointoemailurl = 'http://mail.' + curVue.user.email.split('@')[1];
+			    Pingback.pageLoaded('mail');                    //  第一步
+		    }else if(curHash === '#bmphone'){
+		      	Pingback.pageLoaded('bind');                    //  第二步
+		    }
+		}
+      	curVue.hash = curHash.replace('#','');
+	},
+
+	setHashChangeCallback: function(curVue, pageType, hashStr){
+		if(hashStr === '#rphone' || hashStr === '#fphone' || hashStr === '#bphone' || hashStr === '#bmphone' || hashStr === '#bpfirst'|| hashStr === '#bpthird'){ // 只有在rphone页才会重新获取图文验证码
+          clearInterval(this.codeTimerId);
+          this.codeTimerId = null;       // 清除验证码60s定时器
+          curVue.$broadcast("updatePiccode");
+        }
 	},
 	
 }

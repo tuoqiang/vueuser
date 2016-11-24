@@ -1,14 +1,14 @@
 <template>
   	<topbar text="个人中心" :isvip="isvip"></topbar>
-    <error-msg v-bind:errmsg='errmsg' v-show="errmsg"></error-msg>
+    <error-msg :errmsg='errmsg' v-if="errmsg"></error-msg>
     <user-info :username="username" :username="username" :userstatus="userstatus" :userphoto="userphoto" ></user-info>
     <profile-bg :imgsrc="viprightimg.url" :imgalt="viprightimg.alt"></profile-bg>
-    <button-common @click="gotoPay" btnclass="btn-openvip j-gold" :btntext="btn.btntext" :datahref="btn.datahref"></button-common>  
+    <button-common btnclass="btn-openvip j-gold" :btntext="btn.btntext" :datahref="btn.datahref"></button-common>  
     <toast  content="只差一步<br>请在电视上输入激活码"
             cancelbtntxt="知道啦"
-            v-show="isvipact.isshow">   
+            v-if="isvipact.isshow">   
     </toast>
-    <gift-vip @click="hideGiftBox" v-show="giftvip.isshow" :isvip="isvip" :gifturl="giftvip.gifturl"></gift-vip>
+    <gift-vip @click="hideGiftBox" v-if="giftvip.isshow" :isvip="isvip" :gifturl="giftvip.gifturl"></gift-vip>
 </template>
 
 <script>
@@ -62,11 +62,6 @@ export default {
       GiftVip,
       UserInfo,
       ProfileBg,
-  },
-  events: {
-      'child-account': function (account) {
-          this.user.account = account;
-      }
   },
   created: function () {
       console.log('created run');
@@ -139,18 +134,12 @@ export default {
       Utils.setEvents();
   },
   methods: {
-      //登陆操作
       hideGiftBox: function(){
           this.giftvip.isshow = false;
       },
-      gotoPay: function(){
-          //
-      } 
   },
   events: {
     'showActBox': function(){
-      console.log('showActBox run111111111111111111111111111111111111111111111111111111111111');
-      
         if(this.isvipact.act == 1){                    // isvipac可能取值0:没有权益;  1:有权益未激活。
           console.log('showActBox =' + this.isvipact.act);
           Storage.setSessionStorage('vipacttoast', 1); // 确保在当前会话级页面中toast只弹一次，种个本地存储

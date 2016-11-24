@@ -7,7 +7,7 @@
 					id="email" 
 					name="email" 
 					:placeholder="iptplaceholder" 
-					value="{{ readonlyaccount || localaccount || account }}" 
+					value="{{ localaccount || account }}" 
 					v-model="account" 
 					:readonly="readonly"
 					/>
@@ -15,7 +15,7 @@
 					id="j-btn-clearInput" 
 					v-show="account || localaccount" 
 					@click=clearIpt
-          v-if='!readonlyaccount'></i>
+          v-if='!readonly'></i>
 		</div>
 	</div>
 </template>
@@ -27,14 +27,11 @@ import Utils from 'assets/js/utils.js'
 
 module.exports = {
   props:{
-  		localaccount:'',
-      ismustphone:false, // 是否必填
+  		localaccount:'', // 本地存储中的账号
       iptplaceholder:'',
       labelname:'',
-      ismustemail:false,
-      format:'',
+      format:'', // 格式要求
       readonly:'',
-      readonlyaccount:'',
   },
   data() {
     return {

@@ -15,6 +15,5 @@ module.exports = {
   		imgsrc:'',
       imgalt:'',
   },
-  
 }
 </script>
