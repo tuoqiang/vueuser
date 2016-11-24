@@ -14,20 +14,7 @@
 module.exports = {
   props:{
   		gifturl:'',
-      isvip:''
-  },
-  data() {
-    return {
-      isShowToast: '',
-    }
-  },
-  methods: {
-    gotoFindpwd: function () {
-      window.location = "findpwd.html#findex";
-    },
-    hideToast: function () {
-      this.isShowToast = false;
-    },
+      isvip:false
   }
 }
 </script>

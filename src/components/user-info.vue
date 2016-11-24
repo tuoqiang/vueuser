@@ -7,13 +7,16 @@
         <img :src="userphoto" class="user-avatar" alt="">
       </a>
   </div>
-	<!-- -->
 </template>
 
 <script>
-import Utils from 'assets/js/utils.js'
 
 module.exports = {
+  props:{
+    username:'',
+    userstatus:'',
+    userphoto:'',
+  },
   data() {
     return {  
         PB:{
@@ -23,14 +26,6 @@ module.exports = {
         },
     }
   },
-  props:{
-		username:'',
-    userstatus:'',
-    userphoto:'',
-     
-  },
-  methods: {
-  },
-  
 }
+
 </script>

@@ -10,8 +10,7 @@
           :class='pwdtype=="password" ? "icon-passwd-see" : ""' 
           @click="showPwd" 
           v-show="pwd.length>1"></i>
-      
-    
+
 </template>
 
 

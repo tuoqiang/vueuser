@@ -10,7 +10,7 @@
 					value="{{ pwd }}" 
 					v-model="pwd" 
 					/>
-			<i 		class="icon icon-eye icon-eye-login" 
+			<i 	class="icon icon-eye icon-eye-login" 
 					:class='pwdType=="password" ? "icon-passwd-see" : ""' 
 					@click="showPwd" 
 					v-show="pwd.length>1" >

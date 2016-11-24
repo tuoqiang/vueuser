@@ -11,6 +11,7 @@
 
 
 <script>
+
 import FormChildOldpwd from 'components/form-child-oldpwd'
 import FormChildPwd from 'components/form-child-pwd'
 import FormChildCompwd from 'components/form-child-compwd'
@@ -20,14 +21,13 @@ module.exports = {
   	fatherclass:'',
     fatherinclass:'',
     labelname:'',
-    fatherinclass:'',
     iptplaceholder:'',
     modelpwd:''
   },
   components: {
-      FormChildOldpwd,
-      FormChildPwd,
-      FormChildCompwd,
+    FormChildOldpwd,
+    FormChildPwd,
+    FormChildCompwd,
   },
   data() {
     return {
@@ -39,11 +39,6 @@ module.exports = {
       pwderrormsg:'',
       compwd:'',
       compwderrormsg:'',
-      errormsg:'',
-    }
-  },
-  methods: {
-    a: function () {
     }
   },
   events: {

@@ -1,6 +1,7 @@
 <template>
   <a href="javascript:;"
-  	 class="btn form_btnpos j-pb-click {{btnclass}}"  
+  	 class="btn form_btnpos j-pb-click"  
+     :class = "btnclass"
   	 :data-href="datahref"
   	 :data-click="dataclick"
   	 >

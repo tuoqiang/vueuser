@@ -1,13 +1,18 @@
 var CONFIGURL = 'http://static.ptqy.gitv.tv/tv/common/utils/config.js';
+var submitingFlag = false;
 var Rxports = {
 	HOSTNAMES: 'http://passport.ptqy.gitv.tv/',
-
 	fetchData: function(url, currVue, opts){
 		var self = this;
 		opts.agenttype = 44;
 		return new Promise(function (resolve, reject) {
+			if(submitingFlag) {
+				reject({ code: 'P000ING', errType:'manual' });
+			}
+			submitingFlag = true;
 			currVue.$http.jsonp( self.HOSTNAMES + url, {params: opts} ).then(
 	        	function (res) {
+	        		submitingFlag = false;
 		            if(res.data.code === 'A00000') {
 						console.log('Response Success Data: ' ,res);
 						resolve(res.data.data);
@@ -18,6 +23,7 @@ var Rxports = {
 		        }, 	
 	        	function (res, errorType, error) {
 					console.log('Request Error: ',res);
+					submitingFlag = false;
 					if(!res.data){
 						reject({
 							code: 'tomeout',
@@ -30,7 +36,6 @@ var Rxports = {
 	},
 
 	fetchDataByActvip: function(url, currVue, opts) {
-		console.log('Ajax params: ', opts);
 		return new Promise(function (resolve, reject) {
 			currVue.$http.jsonp( url, {params: opts}  ).then(
 	        	function (res) {
@@ -54,6 +59,7 @@ var Rxports = {
 	        );
         });	
 	},
+	
 	/**
 	 * 请求config.js
 	 */
@@ -70,7 +76,6 @@ var Rxports = {
 		return Deferred;
 	},
 
-	
 	getGiftVip: function(currVue, opts) {
 		return this.fetchDataByActvip('http://openapi.vip.ptqy.gitv.tv/act/tvQueryGiftVip.action', currVue, opts);
 	},
@@ -95,7 +100,7 @@ var Rxports = {
 	 * @param  {[type]} opts [description]
 	 * @return {[type]}      [description]
 	 */
-	sendPhonecode: function(currVue, opts) {
+	verifyPhoneCode: function(currVue, opts) {
 		return this.fetchData('apis/phone/send_cellphone_authcode_vcode.action', currVue, opts);
 	},
 
@@ -155,6 +160,39 @@ var Rxports = {
 	updatePasswd: function(currVue, opts) {
 		return this.fetchData('apis/user/reset_passwd.action',currVue, opts);
 	},
+
+	/**
+	 * pps帐号绑定手机号
+	 * 需要提供未过期的token
+	 * @param  {[type]} opts [description]
+	 * @return {[type]}      [description]
+	 */
+	bindphone: function(currVue, opts) {
+		// opts.https = true;
+		return this.fetchData('apis/phone/mobile_bind_phone.action',currVue, opts);
+	},
+
+	/**
+	 * 交叉验证后通过邮箱绑定手机号
+	 * 需要提供未过期的token
+	 * @param  {[type]} opts [description]
+	 * @return {[type]}      [description]
+	 */
+	bindaccount: function(currVue, opts) {
+		// opts.https = true;
+		return this.fetchData('apis/secure/bind_account.action',currVue, opts);
+	},
+
+	/**
+	 * 变更手机号
+	 * 需要提供未过期的token
+	 * @param  {[type]} opts [description]
+	 * @return {[type]}      [description]
+	 */
+	replacPhone: function(currVue, opts) {
+		return this.fetchData('apis/phone/replace_phone.action',currVue, opts);
+	}
+
 	
 }
 	
