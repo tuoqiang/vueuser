@@ -1,35 +1,104 @@
 <template>
   	<topbar text="变更手机号"></topbar>
-    <error-msg :errmsg='errmsg' v-if="errmsg"></error-msg>
+    <error-msg 
+        :errmsg='errmsg' 
+        v-if="errmsg">
+    </error-msg>
   	<form class="container form-container" action="#" autocomplete="off" id="j-form" style="margin-top:0.25rem;">
       <!-- 变更手机号第一步 -->
        <div v-if="hash == 'bpfirst'" style="height:1.84rem;">
-        <process-step firstttext="手机号" processclass="pwd-title-step1"></process-step>
-        <form-account iptplaceholder="请输入手机号" labelname="手机号：" readonly="readonly" :localaccount="user.oldaccount" ></form-account>
-        <form-piccode :needpiccode="true" ></form-piccode>
-        <button-common @click="getPhoneCode" btnclass="btn-primary form_btnpos01" btntext="发送验证信息"></button-common>  
+          <process-step 
+              firstttext="手机号" 
+              processclass="pwd-title-step1">
+          </process-step>
+          <form-account 
+              iptplaceholder="请输入手机号" 
+              labelname="手机号：" 
+              readonly="readonly" 
+              :localaccount="user.oldaccount" >
+          </form-account>
+          <form-piccode 
+              :needpiccode="true" 
+              datapage="changephone1" 
+              datablock="change">
+          </form-piccode>
+          <button-common 
+              @click="getOldPhoneCode" 
+              btnclass="btn-primary form_btnpos01" 
+              btntext="发送验证信息" 
+              dataclick="msg" 
+              datablock="change">
+          </button-common>  
       </div>
-
       <!-- 变更手机号第二步 -->
       <div v-show="hash == 'bpsecond'" style="height:1.84rem;">
-        <process-step firstttext="手机号" processclass="pwd-title-step2"></process-step>
-        <phonecode :phone="user.account" regethref="changephone.html#bpfirst" phonetxtclass="form-phonetxt2" iptclass="form-group-mt03"></phonecode>
-        <button-common @click="verifyPhoneCode" btnclass="btn-primary form_btnpos01" btntext="立即验证"></button-common>  
+          <process-step 
+              firstttext="手机号" 
+              processclass="pwd-title-step2">
+          </process-step>
+          <phonecode 
+              :phone="user.account" 
+              regethref="changephone.html#bpfirst" 
+              phonetxtclass="form-phonetxt2" 
+              iptclass="form-group-mt03" 
+              dataclick="again" 
+              datablock="change_again">
+          </phonecode>
+          <button-common 
+              @click="verifyOldPhoneCode" 
+              btnclass="btn-primary form_btnpos01" 
+              btntext="完成识别" 
+              dataclick="done" 
+              datablock="change_again">
+          </button-common>  
       </div>
 
       <!-- 变更手机号第三步 -->
       <div v-if="hash == 'bpthird'" style="height:1.84rem;">
-        <process-step firstttext="手机号" processclass="pwd-title-step2"></process-step>
-        <form-account iptplaceholder="请输入手机号" labelname="手机号：" format="phone" ></form-account>
-        <form-piccode :needpiccode="true" ></form-piccode>
-        <button-common @click="getPhoneCode2" btnclass="btn-primary form_btnpos01" btntext="发送验证信息"></button-common>  
+          <process-step 
+              firstttext="手机号" 
+              processclass="pwd-title-step2">
+          </process-step>
+          <form-account 
+              iptplaceholder="请输入手机号" 
+              labelname="手机号：" 
+              format="phone" >
+          </form-account>
+          <form-piccode 
+              :needpiccode="true" 
+              datapage="changephone3" 
+              dataclick="again" 
+              datablock="msgcode">
+          </form-piccode>
+          <button-common 
+              @click="getPhoneCode" 
+              btnclass="btn-primary form_btnpos01" 
+              btntext="发送验证信息" 
+              dataclick="msg" 
+              datablock="bind">
+          </button-common>  
       </div>
-
       <!-- 变更手机号第四步 -->
       <div v-show="hash == 'bpfourth'" style="height:1.84rem;">
-        <process-step if="手机号" processclass="pwd-title-step2"></process-step>
-        <phonecode :phone="user.account" regethref="changephone.html#bpfourth" phonetxtclass="form-phonetxt2" iptclass="form-group-mt03"></phonecode>
-        <button-common @click="verifyPhoneCode2" btnclass="btn-primary form_btnpos01" btntext="立即验证"></button-common>  
+        <process-step 
+              firstttext="手机号" 
+              processclass="pwd-title-step2">
+        </process-step>
+        <phonecode 
+              :phone="user.account" 
+              regethref="changephone.html#bpfourth" 
+              phonetxtclass="form-phonetxt2" 
+              iptclass="form-group-mt03" 
+              dataclick="again" 
+              datablock="msgcode">
+        </phonecode>
+        <button-common 
+              @click="verifyPhoneCode" 
+              btnclass="btn-primary form_btnpos01" 
+              btntext="完成" 
+              dataclick="done" 
+              datablock="msgcode">
+        </button-common>  
       </div>
     </form>
 </template>
@@ -136,7 +205,7 @@ export default {
   },
   methods: {
       //登陆操作
-      getPhoneCode(){
+      getOldPhoneCode(){
           var self = this;
           self.$broadcast("getPiccodeVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
           self.errmsg = self.errMsg.oldpiccodeerrmsg;
@@ -149,11 +218,9 @@ export default {
               location.hash = "bpsecond";
               self.$broadcast("startCountdown");
           },function(res){
-              self.errmsg= Utils.showErrorMsg(res);
-              self.$broadcast("updatePiccode");
           });
       },
-      verifyPhoneCode(){
+      verifyOldPhoneCode(){
           var self = this;
           self.$broadcast("getPhonecodeVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
           self.errmsg = self.errMsg.oldphonecodeerrmsg;
@@ -166,9 +233,10 @@ export default {
               location.hash = "bpthird";
           },function(res){
               self.errmsg= Utils.showErrorMsg(res);
+              Pingback.errLogger(e.code, 'change_again');
           });
       },//登陆操作
-      getPhoneCode2(){
+      getPhoneCode(){
           var self = this;
           self.$broadcast("getPiccodeVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
           self.errmsg = (self.errMsg.accounterrmsg || self.errMsg.piccodeerrmsg);
@@ -179,13 +247,9 @@ export default {
           };
           Utils.getPhonecode(self, data, Utils.REQUEST_CHANGESAVEPHONE).then(function(){
               location.hash = "bpfourth";
-              self.$broadcast("startCountdown");
-          },function(res){
-              self.errmsg= Utils.showErrorMsg(res);
-              self.$broadcast("updatePiccode");
-          });
+          },function(res){});
       },
-      verifyPhoneCode2(){
+      verifyPhoneCode(){
           var self = this;
           self.$broadcast("getPhonecodeVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
           self.errmsg = self.errMsg.phonecodeerrmsg;
@@ -209,23 +273,20 @@ export default {
                     Utils.openProfilePage();
                   }, TIMEOUT_GO);
 
-                  Pingback.userBehavior('phone_mail', function() {
+                  Pingback.userBehavior('phone_chg', function() {
                     clearTimeout(timerId);                    // 如果pingback发送成功，取消定时器
                     Utils.openProfilePage();
                   });
                 
               }, function(res) {
                   self.errmsg= Utils.showErrorMsg(res);
+                  Pingback.errLogger(e.code, 'msgcode');
               });
           },function(res){
               self.errmsg= Utils.showErrorMsg(res);
+              Pingback.errLogger(e.code, 'msgcode');
           });
       },
   }  
 }
 </script>
-
-
-
-
-

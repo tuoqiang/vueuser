@@ -1,24 +1,52 @@
 <template>
-  	<topbar text="登录">登录</topbar>
-    <error-msg :errmsg='errmsg' v-if="errmsg"></error-msg>
-  	<login-tips text="登录后可一键成为VIP会员" v-if="tipsmsg && !errmsg"></login-tips>
+  	<topbar text="登录"></topbar>
+    <error-msg 
+        :errmsg='errmsg' 
+        v-if="errmsg">
+    </error-msg>
+  	<login-tips 
+        text="登录后可一键成为VIP会员" 
+        v-if="tipsmsg && !errmsg">
+    </login-tips>
   	<form class="form-container contianer_ht1" action="#" autocomplete="on" >
-    		<form-account iptplaceholder="手机号/邮箱" labelname="帐&nbsp;&nbsp;&nbsp;&nbsp;号：" :localaccount="user.account"></form-account>
-    		<form-loginpwd :needpiccode="needpiccode" ></form-loginpwd>
-    		<form-piccode :needpiccode="needpiccode" ></form-piccode>
-    		<button-common @click="loginAction" btnclass="btn-primary form_btnpos02" btntext="登陆" dataclick="login"></button-common>	
-    		<button-common datahref="register.html#rphone" btnclass="formcommon-sty form_btnpos01" btntext="立即注册" dataclick="signup" ></button-common>	
+    		<form-account 
+            iptplaceholder="手机号/邮箱" 
+            labelname="帐&nbsp;&nbsp;&nbsp;&nbsp;号：" 
+            :localaccount="user.account">
+        </form-account>
+    		<form-loginpwd 
+            :needpiccode="needpiccode">
+        </form-loginpwd>
+    		<form-piccode 
+            :needpiccode="needpiccode" 
+            datapage="login">
+        </form-piccode>
+    		<button-common 
+            @click="loginAction" 
+            btnclass="btn-primary form_btnpos02" 
+            btntext="登陆" 
+            dataclick="login">
+        </button-common>	
+    		<button-common 
+            datahref="register.html#rphone" 
+            btnclass="formcommon-sty form_btnpos01" 
+            btntext="立即注册" 
+            dataclick="signup">
+        </button-common>	
   	</form>
-    <toast  content="登录不上？试试找回密码吧"
-            comformbtntxt="去试试"
-            cancelbtntxt="稍后再说"
-            v-if="pwdErrorCount > 2">   
+    <toast
+        content="登录不上？试试找回密码吧"
+        comformbtntxt="去试试"
+        cancelbtntxt="稍后再说"
+        :pwderrorcount="pwdErrorCount">   
     </toast>
-    <error-page :errorpagetex="errorpagetex" v-if="errorpagetex"></error-page>
+    <error-page 
+        :errorpagetex="errorpagetex" 
+        v-if="errorpagetex">
+    </error-page>
 </template>
 
 <script>
-
 import Lib from 'assets/js/lib.js'
 import Utils from 'assets/js/utils.js'
 import Config from 'assets/js/config.js'
@@ -87,7 +115,7 @@ export default {
       },
       'child-piccode': function (piccode) {
           this.user.piccode = piccode;
-      }
+      },
   },
   created: function () {
       console.log('created run')
@@ -110,7 +138,6 @@ export default {
       Pingback.pageLoaded();
   },
   methods: {
-      //登陆操作
       loginAction(){
           var self = this;
           self.$broadcast("getAccountVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
@@ -126,7 +153,7 @@ export default {
           };
           Server.userLogin(self, data).then(function (res) {
               console.log('Server.userLogin request success:'+ res);
-              localStorage.setItem('tv_login_account ', encodeURIComponent(self.user.account));         // 把当前登录成功的帐号保存到本地，下次打开登录页时读取显示
+              localStorage.setItem('tv_login_account ', encodeURIComponent(self.user.account));         //帐号保存到本地，下次打开登录页时显示
               Utils.confirmTokenLogin(self,  Utils.BEHAVIOR_LOGIN).then(function(){}, function(fail){   
                 self.errorpagetex = Utils.tokenError.login// 如果存在redirectUrl，则token失效继续跳转走后面的逻辑                              
               });
@@ -139,7 +166,7 @@ export default {
                  self.needpiccode = true; 
               }
               self.needpiccode && self.$broadcast("updatePiccode");
-              (res.code === 'P00117') && (++self.pwdErrorCount >= 2); // 密码错误三次以上显示找回密码弹框
+              (res.code === 'P00117') && (++self.pwdErrorCount >= 2) && self.$broadcast("sendToastShowPb"); // 密码错误三次以上显示找回密码弹框
               Pingback.errLogger(res.code, 'login');
           });
       },

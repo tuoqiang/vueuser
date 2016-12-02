@@ -1,17 +1,30 @@
 <template>
   	<topbar text="安全中心"></topbar>
-    <error-msg :errmsg='errmsg' v-if="errmsg"></error-msg>
+    <error-msg 
+            :errmsg='errmsg' 
+            v-if="errmsg" >
+    </error-msg>
     <div class="btn-w-out btn-w-mt btn-w-bortop">
-      <button-common-a  btntext="修改密码" btnclass="btn-mdfpwd" :datahref="modpwdhref"></button-common-a>
+        <button-common-a  
+            btntext="修改密码" 
+            btnclass="btn-mdfpwd" 
+            dataclick="reset"
+            :datahref="modpwdhref">
+        </button-common-a>
     </div>
     <div class="btn-w-out btn-w-borbot">
-      <button-common-a @click="gotoBind" :btntext="bind.btnname" btnclass="btn-mdfpwd" :datahref="bind.datahref"></button-common-a>
+        <button-common-a 
+            @click="gotoBind" 
+            btnclass="btn-mdfpwd" 
+            :btntext="bind.btnname" 
+            :datahref="bind.datahref" 
+            :dataclick="bind.dataclick" >
+        </button-common-a>
     </div >
 </template>
 
 
 <script>
-
 import Lib from 'assets/js/lib.js'
 import Utils from 'assets/js/utils.js'
 import Config from 'assets/js/config.js'
@@ -30,7 +43,8 @@ export default {
           bind: {        // 绑定业务
             btnname: '',
             type:1,
-            datahref:''
+            datahref:'',
+            dataclick:'',
           },
           email:'', // 已绑定邮箱
           phone:'', // 已绑定手机号
@@ -41,8 +55,8 @@ export default {
     	Topbar,
       ErrorMsg,
   },
-  created: function () {
-      console.log('created run');
+  ready: function(){
+  	  console.log('ready run');
       var self = this;
       var authCookie = Utils.getAuthCookie();
       !authCookie && Utils.openPageByName('login');
@@ -61,18 +75,19 @@ export default {
         self.bind.type = Utils.getBindType(userinfo);
         self.bind.btnname = (self.bind.type != 2 ? '绑定手机号' : '变更手机号');
         self.bind.datahref = Utils.getBindHref(self.bind.type);
+        self.bind.dataclick = Utils.getBindClick(self.bind.type);
+
+        Utils.setEvents();
+        Pingback.init('account', userinfo.uid, userType, Utils.getNewEId());      // 第4个参数如果是getNewE，则重新设置e字段
+        Pingback.pageLoaded();
       },function(res){
           console.log('Server.getUserInfo request fail');
-          self.errmsg = Utils.showErrorMsg(res);   
+          self.errmsg = Utils.showErrorMsg(res); 
+          Pingback.errLogger(e.code, 'account');
       });
-  },
-  ready: function(){
-  	  console.log('ready run');
-      Utils.setEvents();
   },
   methods: {
       gotoBind: function(){
-          console.log('h5_moble! gotoBind() run');
           var arr = [this.email, this.phone]; // 在绑定页需要当前邮箱(手机号)，存储到本地
           localStorage.setItem('h5_bind_by_email', arr[this.bind.type-1]);        
       },

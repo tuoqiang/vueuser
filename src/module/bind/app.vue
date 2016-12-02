@@ -1,19 +1,55 @@
 <template>
   	<topbar text="绑定手机号"></topbar>
-    <error-msg :errmsg='errmsg' v-if="errmsg"></error-msg>
+    <error-msg 
+        :errmsg='errmsg' 
+        v-if="errmsg">
+    </error-msg>
   	<form class="form-container contianer_ht1" action="#" autocomplete="on" >
     <!-- pps绑定手机号第一步 -->
       <div v-show="hash == 'bphone'" class="hgt2">
-          <process-step firstttext="身份识别" processclass="pwd-title-step1"></process-step>
-          <form-account iptplaceholder="请输入手机号" labelname="手机号：" format="phone" ></form-account>
-          <form-piccode :needpiccode="true" ></form-piccode>
-          <button-common @click="getPhoneCode" btnclass="btn-primary form_btnpos01" btntext="发送验证信息"></button-common>  
+          <process-step 
+              firstttext="身份识别" 
+              processclass="pwd-title-step1">
+          </process-step>
+          <form-account 
+              iptplaceholder="请输入手机号" 
+              labelname="手机号：" 
+              format="phone" >
+          </form-account>
+          <form-piccode 
+              :needpiccode="true" 
+              datapage="bind" 
+              datablock="bind">
+          </form-piccode>
+          <button-common 
+              @click="getPhoneCode" 
+              btnclass="btn-primary form_btnpos01" 
+              btntext="发送验证信息" 
+              dataclick="msg" 
+              datablock="bind">
+          </button-common>  
       </div>
       <!-- pps绑定手机号第二步 -->
       <div v-show="hash == 'bcode'" class="hgt2">
-        <process-step firstttext="身份识别" processclass="pwd-title-step2"></process-step>
-        <phonecode :phone="user.account" regethref="bind.html#bphone" phonetxtclass="form-phonetxt2" iptclass="form-group-mt03"></phonecode>
-        <button-common @click="sendBindRequest" btnclass="btn-primary form_btnpos01" btntext="完成"></button-common>  
+        <process-step 
+              firstttext="身份识别" 
+              processclass="pwd-title-step2">
+        </process-step>
+        <phonecode 
+              :phone="user.account" 
+              regethref="bind.html#bphone" 
+              phonetxtclass="form-phonetxt2" 
+              iptclass="form-group-mt03" 
+              dataclick="again" 
+              datablock="msgcode">
+        </phonecode>
+        <button-common 
+              @click="sendBindRequest" 
+              btnclass="btn-primary form_btnpos01" 
+              btntext="完成" 
+              dataclick="done" 
+              datablock="msgcode">
+        </button-common>  
       </div>
 </template>
 
@@ -80,27 +116,6 @@ export default {
           this.user.phonecode = phonecode;
       },
   },
-  created: function () {
-      console.log('created run');
-      this.authCookie = Utils.getAuthCookie();
-      var URL_BINDPARAMS = 'urlBindParams';
-      var curHash = Utils.getHashAndParams()[0];
-      var paramsStr = Utils.getHashAndParams()[1];
-      this.urlParams = Utils.stringToObj(paramsStr, '&', '=');
-      console.log('urlParams' + this.urlParams);
-      var s1 = 'pps' ;
-      if(this.urlParams && this.urlParams.s1){s1 = this.urlParams.s1; }
-      Pingback.init(s1);
-      (curHash === '') && (curHash = '#bphone');
-      this.hash = curHash.replace('#','');
-
-      if(curHash === '#bphone'){
-        this.urlParams && Storage.setSessionStorage(URL_BINDPARAMS, this.urlParams);
-        Pingback.pageLoaded('bind');                //  第一步
-      }else if(curHash === '#bcode'){
-        this.urlParams = (Pingback.getUrlParamsStorage(URL_BINDPARAMS) || {});
-      }
-  },
   ready: function(){
     var self = this;
     var hashChangeCallback = function(){
@@ -109,7 +124,22 @@ export default {
         Utils.setHashChangeCallback(location.hash)
     }
     Utils.bindHashChange(hashChangeCallback);  // 绑定hash值变化时的回调函数
-    
+    this.authCookie = Utils.getAuthCookie();
+    var URL_BINDPARAMS = 'urlBindParams';
+    var curHash = Utils.getHashAndParams()[0];
+    var paramsStr = Utils.getHashAndParams()[1];
+    this.urlParams = Utils.stringToObj(paramsStr, '&', '=');
+    console.log('urlParams' + this.urlParams);
+    var s1 = 'pps' ;
+    if(this.urlParams && this.urlParams.s1){s1 = this.urlParams.s1; }
+    Pingback.init(s1);
+    (curHash === '') && (curHash = '#bphone');
+    this.hash = curHash.replace('#','');
+    if(curHash === '#bphone'){
+      this.urlParams && Storage.setSessionStorage(URL_BINDPARAMS, this.urlParams);
+    }else if(curHash === '#bcode'){
+      this.urlParams = (Pingback.getUrlParamsStorage(URL_BINDPARAMS) || {});
+    }
   },
   methods: {
       getPhoneCode(){
@@ -124,15 +154,10 @@ export default {
           };
           Utils.getPhonecode(self, data, Utils.REQUEST_BIND).then(function(){
               location.hash = "bcode";
-              self.$broadcast("startCountdown");
-          },function(res){
-              self.errmsg= Utils.showErrorMsg(res);
-              self.$broadcast("updatePiccode");
-          });
+          },function(res){});
       },
       sendBindRequest(){
           var self = this;
-          var userBehavior = 'phone_pps'; 
           self.$broadcast("getPhonecodeVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
           self.errmsg = self.errMsg.phonecodeerrmsg;
           if(self.errmsg){ return false; }   // 前端校验
@@ -150,12 +175,13 @@ export default {
                 Utils.gotoPageByUrl(self.urlParams);
               }, 500);
 
-              Pingback.userBehavior(userBehavior, function() {
+              Pingback.userBehavior('phone_pps', function() {
                 clearTimeout(timerId);                  // 如果pingback发送成功，取消定时器
                 Utils.gotoPageByUrl(self.urlParams);
               });
           },function(res){
               self.errmsg= Utils.showErrorMsg(res);
+              Pingback.errLogger(e.code, 'msgcode');            // pingback错误日志，确认提交按钮
           });
       },
   }  

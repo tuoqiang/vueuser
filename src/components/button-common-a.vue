@@ -1,17 +1,24 @@
 <template>
-  <a href="javascript:;" :data-href="datahref" class="btn-w btn-mdfpwd j-pb-click color-01 {{btnclass}}" >
-    {{btntext}}
-    <i class="arrow-r vertical-center"></i>
+  <a 
+      href="javascript:;" 
+      class="btn-w btn-mdfpwd j-pb-click color-01" 
+      :data-href="datahref" 
+      :data-click="dataclick" 
+      :data-block="datablock"  
+      :class="btnclass">
+          {{btntext}}
+          <i class="arrow-r vertical-center"></i>
   </a>
 </template>
-
 
 <script>
 module.exports = {
   props:{
   	'btntext':'',
     'btnclass': '',
-    'datahref':''
-  }
+    'datahref': '',
+    'dataclick': '',
+    'datablock': '',
+   }
 }
 </script>

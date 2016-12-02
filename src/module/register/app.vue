@@ -1,33 +1,90 @@
 <template>
   	<topbar text="注册"></topbar>
-    <error-msg :errmsg='errmsg' v-if="errmsg"></error-msg>
+    <error-msg 
+        :errmsg='errmsg' 
+        v-if="errmsg">
+    </error-msg>
   	<form class="form-container contianer_ht1" action="#" autocomplete="on" >
         <!-- 注册第一步 -->
         <div v-show="hash == 'rphone'">
-          <form-account iptplaceholder="请输入手机号" labelname="手机号："  format="phone"></form-account>
-          <form-piccode :needpiccode="true" ></form-piccode>
-          <button-common @click="getPhoneCode" btnclass="btn-primary form_btnpos02" btntext="下一步"></button-common>  
-          <button-common @click="" btnclass="formcommon-sty form_btnpos01" btntext="登录"></button-common>
+            <form-account 
+                  iptplaceholder="请输入手机号" 
+                  labelname="手机号："  
+                  format="phone">
+            </form-account>
+            <form-piccode 
+                  :needpiccode="true" 
+                  datapage="signup" 
+                  datablock="signup" >
+            </form-piccode>
+            <button-common 
+                  @click="getPhoneCode" 
+                  btnclass="btn-primary form_btnpos02" 
+                  btntext="下一步" 
+                  dataclick="next" 
+                  datablock="signup" >
+            </button-common>  
+            <button-common 
+                  datahref="login.html" 
+                  btnclass="formcommon-sty form_btnpos01" 
+                  btntext="登录" 
+                  dataclick="signup" 
+                  datablock="signup" >
+            </button-common>
         </div>
         <!-- 注册第二步 -->
     		<div v-show="hash == 'rcode'" class="hgt1">
-          <phonecode :phone="user.account" regethref="register.html#rphone" phonetxtclass="form-phonetxt"  iptclass="form-bortop-pos1"></phonecode>
-          <button-common @click="verifyPhoneCode" btnclass="btn-primary form_btnpos02" btntext="立即注册"></button-common>  
+            <phonecode 
+                  :phone="user.account" 
+                  regethref="register.html#rphone" 
+                  phonetxtclass="form-phonetxt"  
+                  iptclass="form-bortop-pos1" 
+                  dataclick="again" 
+                  datablock="msg">
+            </phonecode>
+            <button-common 
+                  @click="verifyPhoneCode" 
+                  btnclass="btn-primary form_btnpos02" 
+                  btntext="立即注册" 
+                  dataclick="setpwd" 
+                  datablock="msg">
+            </button-common>  
         </div>
         <!-- 注册第三步 -->
         <div v-show="hash == 'rpwd'" class="hgt1 pr" >
-          <form-pwd fatherclass="form-bortop" labelname="密码：" iptplaceholder="8-20位字母、数字或字符的组合" modelpwd="pwd"></form-pwd>
-          <form-pwd fatherclass="form-group-bt" fatherinclass="form-group-in-nnobor" labelname="确认密码：" iptplaceholder="请再次输入密码"  modelpwd="compwd"></form-pwd> 
-          <button-common @click="regist" btnclass="btn-primary form_btnpos01" btntext="完成"></button-common>  
-          <p class="contract" style="left: 0.3rem;">我已阅读同意<a href="agreement.html">《注册协议》</a></p>
+            <form-pwd 
+                  fatherclass="form-bortop" 
+                  labelname="密码：" 
+                  iptplaceholder="8-20位字母、数字或字符的组合" 
+                  modelpwd="pwd">
+            </form-pwd>
+            <form-pwd 
+                  fatherclass="form-group-bt" 
+                  fatherinclass="form-group-in-nnobor" 
+                  labelname="确认密码：" 
+                  iptplaceholder="请再次输入密码"  
+                  modelpwd="compwd">
+            </form-pwd> 
+            <button-common 
+                  @click="regist" 
+                  btnclass="btn-primary form_btnpos01" 
+                  btntext="完成" 
+                  dataclick="signupdone" 
+                  datablock="setpwd">
+            </button-common>  
+            <p class="contract lft3">我已阅读同意<a href="agreement.html">《注册协议》</a></p>
         </div>
   	</form>
-    <toast  content="在电脑或手机上注册过？试试其它方式完成登录吧"
+    <toast  
+            content="在电脑或手机上注册过？试试其它方式完成登录吧"
             comformbtntxt="去试试"
             cancelbtntxt="稍后再说"
-            v-if="isRegistered">   
+            :isregistered="isRegistered">   
     </toast>
-    <error-page :errorpage="errorpage" v-if="errorpage"></error-page>
+    <error-page 
+            :errorpagetex="errorpagetex" 
+            v-if="errorpagetex">
+    </error-page>
 </template>
 
 <script>
@@ -117,7 +174,7 @@ export default {
   },
   created: function () {
       console.log('created run');
-      Utils.setPageHash(this, 'register', location.hash);
+      
   },
   ready: function(){
     var self = this;
@@ -128,6 +185,8 @@ export default {
     }
     Utils.bindHashChange(hashChangeCallback);  // 绑定hash值变化时的回调函数
     Utils.setEvents();
+    Pingback.init('signup');
+    Utils.setPageHash(this, 'register', location.hash);
   },
   methods: {
       getPhoneCode(){
@@ -142,11 +201,9 @@ export default {
           };
           Utils.getPhonecode(self, data, Utils.REQUEST_REGISTER).then(function(){
               location.hash = "rcode";
-              self.$broadcast("startCountdown");
           },function(res){
-              self.errmsg= Utils.showErrorMsg(res);
               self.isRegistered = (res.code === 'P00404');
-              self.$broadcast("updatePiccode");
+              self.isRegistered && self.$broadcast("sendToastShowPb");
           });
       },
       verifyPhoneCode(){
@@ -162,6 +219,7 @@ export default {
               location.hash = "rpwd";
           },function(res){
               self.errmsg= Utils.showErrorMsg(res);
+              Pingback.errLogger(res.code, 'msg');
           });
       },
       regist(){

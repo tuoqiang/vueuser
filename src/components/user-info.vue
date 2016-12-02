@@ -1,16 +1,26 @@
 <template>
   <div>
-      <a  href="javascript:;" :data-href="PB.href" :data-click="PB.click" :data-block="PB.block"  class="userinfo j-pb-click" >
-        <p class="user-name user-status color-01" id="j-username">{{username}}</p>
-        <p class="user-status color-01 user-hidetxt" id="j-userstatus">{{userstatus}}</p>
-        <i class="arrow-r vertical-center"></i>
-        <img :src="userphoto" class="user-avatar" alt="">
-      </a>
+        <a  
+            href="javascript:;" 
+            class="userinfo j-pb-click"
+            :data-href="PB.href" 
+            :data-click="PB.click" 
+            :data-block="PB.block" >
+              <p  class="user-name user-status color-01">
+                  {{username}}
+              </p>
+              <p  class="user-status color-01 user-hidetxt">
+                  {{userstatus}}
+              </p>
+              <i  class="arrow-r vertical-center"></i>
+              <img 
+                  :src="userphoto" 
+                  class="user-avatar" >
+        </a>
   </div>
 </template>
 
 <script>
-
 module.exports = {
   props:{
     username:'',
@@ -27,5 +37,4 @@ module.exports = {
     }
   },
 }
-
 </script>

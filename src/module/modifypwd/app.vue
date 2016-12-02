@@ -1,44 +1,128 @@
 <template>
   	<topbar text="修改密码"></topbar>
-    <error-msg :errmsg='errmsg' v-if="errmsg"></error-msg>
+    <error-msg 
+        :errmsg='errmsg' 
+        v-if="errmsg">
+    </error-msg>
   	<form class="container form-container" action="#" autocomplete="off" id="j-form" style="margin-top:0.25rem;">
-     
       <!-- 手机修改密码第一步 -->
       <div v-if="hash == 'mphone'" class="hgt2">
-        <process-step firstttext="手机号" processclass="pwd-title-step1"></process-step>
-        <form-account iptplaceholder="请输入手机号" labelname="手机号：" readonly="readonly" :localaccount="user.account"  ></form-account>
-        <form-piccode :needpiccode="true" ></form-piccode>
-        <button-common @click="getPhoneCode" btnclass="btn-primary form_btnpos01" btntext="发送验证信息"></button-common>  
+        <process-step 
+            firstttext="手机号" 
+            processclass="pwd-title-step1">
+        </process-step>
+        <form-account 
+            iptplaceholder="请输入手机号" 
+            labelname="手机号：" 
+            readonly="readonly" 
+            :localaccount="user.account"  >
+         </form-account>
+        <form-piccode 
+            :needpiccode="true" 
+            datapage="modifypwd" 
+            data-block="msg">
+        </form-piccode>
+        <button-common 
+            @click="getPhoneCode" 
+            btnclass="btn-primary form_btnpos01" 
+            btntext="发送验证信息" 
+            dataclick="next" 
+            datablock="msg">
+        </button-common>  
       </div>
-
       <!-- 手机修改密码第二步 -->
       <div v-show="hash == 'mcode'" class="hgt2">
-        <process-step firstttext="手机号" processclass="pwd-title-step2"></process-step>
-        <phonecode :phone="user.account" :regethref="regethref" phonetxtclass="form-phonetxt2" iptclass="form-group-mt03"></phonecode>
-        <button-common @click="verifyPhoneCode" btnclass="btn-primary form_btnpos01" btntext="立即验证"></button-common>  
+        <process-step 
+            firstttext="手机号" 
+            processclass="pwd-title-step2">
+        </process-step>
+        <phonecode 
+            :phone="user.account" 
+            :regethref="regethref" 
+            phonetxtclass="form-phonetxt2" 
+            iptclass="form-group-mt03" 
+            dataclick="again" 
+            datablock="msgcode">
+        </phonecode>
+        <button-common 
+            @click="verifyPhoneCode" 
+            btnclass="btn-primary form_btnpos01" 
+            btntext="立即验证" 
+            dataclick="next" 
+            datablock="msgcode">
+        </button-common>  
       </div>
-
       <!-- 手机-邮箱修改密码第三步 -->
       <div v-if="hash == 'mpwd'" class="hgt3 pr">
-        <process-step firstttext="手机号" processclass="pwd-title-step3"></process-step>
-        <form-pwd fatherclass="form-bortop" labelname="原密码：" iptplaceholder="请输入密码" modelpwd="oldpwd"></form-pwd>
-        <form-pwd labelname="新密码：" iptplaceholder="8-20位字母、数字或字符的组合" modelpwd="pwd"></form-pwd>
-        <form-pwd fatherclass="form-group-bt" fatherinclass="form-group-in-nnobor" labelname="确认密码：" iptplaceholder="请再次输入密码"  modelpwd="compwd"></form-pwd> 
-        <button-common @click="fpwd" btnclass="btn-primary form_btnpos01" btntext="完成"></button-common>  
+        <process-step 
+            firstttext="手机号" 
+            processclass="pwd-title-step3">
+        </process-step>
+        <form-pwd 
+            fatherclass="form-bortop" 
+            labelname="原密码：" 
+            iptplaceholder="请输入密码" 
+            modelpwd="oldpwd">
+        </form-pwd>
+        <form-pwd 
+            labelname="新密码：" 
+            iptplaceholder="8-20位字母、数字或字符的组合" 
+            modelpwd="pwd">
+        </form-pwd>
+        <form-pwd 
+            fatherclass="form-group-bt" 
+            fatherinclass="form-group-in-nnobor" 
+            labelname="确认密码：" 
+            iptplaceholder="请再次输入密码"  
+            modelpwd="compwd">
+        </form-pwd> 
+        <button-common 
+            @click="fpwd" 
+            btnclass="btn-primary form_btnpos01" 
+            btntext="完成" 
+            dataclick="done" 
+            datablock="reset">
+        </button-common>  
       </div>
-
       <!-- 邮箱修改密码第一步 -->
       <div v-if="hash == 'memail'" class="hgt2">
-        <process-step firstttext="邮箱地址" processclass="pwd-title-step1"></process-step>
-        <form-account iptplaceholder="请输入邮箱" labelname="邮&nbsp;&nbsp;箱："  readonly="readonly" :localaccount="user.account"></form-account>
-        <button-common @click="sendEmail" btnclass="btn-primary form_btnpos01" btntext="发送验证信息"></button-common>  
+        <process-step 
+            firstttext="邮箱地址" 
+            processclass="pwd-title-step1">
+        </process-step>
+        <form-account 
+            iptplaceholder="请输入邮箱" 
+            labelname="邮&nbsp;&nbsp;箱："  
+            readonly="readonly" 
+            :localaccount="user.account">
+        </form-account>
+        <button-common 
+            @click="sendEmail" 
+            btnclass="btn-primary form_btnpos01" 
+            btntext="发送验证信息"  
+            dataclick="next" 
+            datablock="mail">
+        </button-common>  
       </div>
-
       <!-- 邮箱修改密码第二步 -->
       <div  v-show="hash == 'memailr'" class="hgt2">
-        <process-step firstttext="邮箱地址" processclass="pwd-title-step2"></process-step>
-        <email-counter :localaccount="user.account"></email-counter>
-        <button-common  @click="fpwd" btnclass="btn-primary form_btnpos01" btntext="立即进入邮箱" :datahref="gointoemailurl"></button-common>  
+        <process-step 
+            firstttext="邮箱地址" 
+            processclass="pwd-title-step2">
+        </process-step>
+        <email-counter 
+            :localaccount="user.account" 
+            dataclick="again" 
+            datablock="mailcode">
+        </email-counter>
+        <button-common  
+            @click="fpwd" 
+            btnclass="btn-primary form_btnpos01" 
+            btntext="立即进入邮箱" 
+            :datahref="gointoemailurl" 
+            dataclick="openmail" 
+            datablock="mailcode" >
+        </button-common>  
       </div>
     </form>
 </template>
@@ -140,7 +224,7 @@ export default {
           this.user.compwd = compwd;
       },
       'send-email-again': function(){ // 重新发送验证邮件
-          this.sendEmail();
+          this.sendEmail('mailcode');
       },
   },
   created: function () {
@@ -175,6 +259,7 @@ export default {
   methods: {
       setView(urlParams) {
         console.log('setView run');
+        var self = this;
         var u = urlParams.u;
         // 根据用户类型不同，显示不同的视图
         if(Utils.isCellphone(u)) {                    // 账户是手机号
@@ -182,12 +267,10 @@ export default {
           self.user.account = Utils.getEncryptPhone(u, 7);
           self.regethref = location.href;
           location.hash = 'mphone';
-          Pingback.pageLoaded('msg');             // 展示pingback，手机修改密码第一步页面
         }else if(Utils.isEmail(u)) {          // 账户是邮箱
           self.user.account = Utils.getEncryptEamil(u);
           console.log(self.email);
           location.hash = 'memail';
-          Pingback.pageLoaded('mail');              // 展示pingback，邮箱修改密码第一步页面
         }
       },
       getPhoneCode(){
@@ -201,11 +284,7 @@ export default {
           };
           Utils.getPhonecode(self, data, Utils.REQUEST_MODPWD, this.authcookie).then(function(){
               location.hash = "mcode";
-              self.$broadcast("startCountdown");
-          },function(res){
-              self.errmsg= Utils.showErrorMsg(res);
-              self.$broadcast("updatePiccode");
-          });
+          },function(res){});
       },
       verifyPhoneCode(){
           var self = this;
@@ -220,6 +299,7 @@ export default {
               self.resetpwdToken = Storage.getRstPwdToken();      // cookie P00014的值，通过验证手机验证码或者验证邮箱通过后种上。
               location.hash = "mpwd";
           },function(res){
+              Pingback.errLogger(res.code, 'msgcode');
               self.errmsg= Utils.showErrorMsg(res);
           });
       },
@@ -254,9 +334,10 @@ export default {
               Utils.openProfilePage();                // 跳转到个人中心页, 此处没有Pingback
           },function(res){
               self.errmsg= Utils.showErrorMsg(res);
+              Pingback.errLogger(e.code, 'reset');
           });
       },
-      sendEmail(){
+      sendEmail(blcok){
           var self = this;
           self.$broadcast("getAccountVal"); // 父组件广播一个事件，去通知子组件把账号值传过来
           var data = {
@@ -269,10 +350,12 @@ export default {
               self.$broadcast("startEmailCountdown");
               self.gointoemailurl = 'http://mail.' + self.urlParams.u.split('@')[1];
               location.hash = "memailr";
-              localStorage.setItem('h5_modifyPwd_byemail', 'http://mail.' + self.urlParams.u.split('@')[1]);
-              localStorage.setItem('h5_modifyPwd_email', self.urlParams.u); //待： 把邮箱种到本地存储中：作用 当点击立即进入邮箱按钮进入邮箱登录页再返回时，页面中的邮箱已被清空，此时从缓存中读取刚才输入的邮箱
+              localStorage.setItem('tv_gointoEmailBtnUrl', self.gointoemailurl);
+              localStorage.setItem('tv_account_byemail', self.urlParams.u); //把邮箱种到本地存储中：作用 当点击立即进入邮箱按钮进入邮箱登录页再返回时，页面中的邮箱已被清空，此时从缓存中读取刚才输入的邮箱
           },function(res){
               self.errmsg= Utils.showErrorMsg(res);
+              if(block != 'mailcode'){block = 'mail'}
+              Pingback.errLogger(e.code, block);
           });
       },
   }  

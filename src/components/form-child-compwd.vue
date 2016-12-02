@@ -1,18 +1,18 @@
 <template>
   
-       <input :type="pwdtype" 
-              class="form-control" 
-              placeholder="{{placeholder}}"
-              value="{{ pwd }}" 
-              v-model="pwd" 
-              >
-      <i class="icon icon-eye icon-passwd-see" 
-              :class='pwdtype=="password" ? "icon-passwd-see" : ""' 
-               @click="showPwd" 
-               v-show="pwd.length>1"></i>
+    <input 
+        :type="pwdtype" 
+        class="form-control" 
+        placeholder="{{placeholder}}"
+        value="{{ pwd }}" 
+        v-model="pwd" >
+    <i  class="icon icon-eye icon-passwd-see" 
+        @click="showPwd" 
+        :class='pwdtype=="password" ? "icon-passwd-see" : ""' 
+        v-show="pwd.length>1" >
+    </i>
     
 </template>
-
 
 <script>
 module.exports = {

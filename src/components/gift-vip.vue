@@ -1,13 +1,21 @@
 <template>
-  <div>
-      <div id="goldrightscontainer" class="goldrightscontainer">
-      <div id="goldrightsbox" class="goldrightsbox"></div>
-      <div id="goldrightstips"  class="goldrightstips">点击领取赠送的黄金会员</div>
-      <div id="goldrightsarrow" class="goldrightsarrow"></div>
+    <div>
+          <div class="goldrightscontainer">
+          <div class="goldrightsbox"></div>
+          <div class="goldrightstips">点击领取赠送的黄金会员</div>
+          <div class="goldrightsarrow"></div>
     </div>
-    <div id="goldrightsbtn" class="goldrightsbtn" :class="isvip ? 'goldrightsbtn_vip' : ''"><a id="goldrightsbtnA" class="j-pb-click" :data-href="gifturl" data-click="gold" data-block="gold" ></a></div> 
+    <div 
+          class="goldrightsbtn" 
+          :class="isvip ? 'goldrightsbtn_vip' : ''" >
+              <a  
+                class="j-pb-click" 
+                :data-href="gifturl" 
+                data-click="gold" 
+                data-block="gold" >
+              </a>
+    </div> 
   </div>
-	<!-- -->
 </template>
 
 <script>

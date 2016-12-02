@@ -43,7 +43,7 @@ var PB_BEHAVIOR_BIND		= 10		// 绑定手机号
 // 数据统计常量
 var SCENE_LOGIN		= 'login'			// 登录
 var SCENE_REGISTER 	= 'register'		// 注册
-var SCENE_FINDPWD	= 'findpwd'		// 找回密码
+var SCENE_FINDPWD	= 'resetpwd'		// 找回密码
 var SCENE_MODPWD	= 'modpwd'		// 修改密码
 var SCENE_BIND		= 'bind'		// 绑定手机号
 
@@ -52,8 +52,6 @@ Rxports.BEHAVIOR_REGISTER 	= 2		// 注册
 Rxports.BEHAVIOR_FINDPWD	= 3		// 找回密码
 Rxports.BEHAVIOR_MODPWD		= 4			// 修改密码
 Rxports.BEHAVIOR_BIND		= 5		// 绑定手机号*/
-
-
 
 var Rxports = {
 	PAGEDOMAIN:'http://cms.ptqy.gitv.tv:8083/module/',	// 
@@ -104,14 +102,21 @@ var Rxports = {
 						}
 					).then(function(res){
 						console.log("Server.verifyPhoneCode success");
+						currVue.$broadcast("startCountdown");
 						resolve(res);	
 					}, function(res) {
 						console.log("Server.verifyPhoneCode fail");
+						currVue.errmsg= Utils.showErrorMsg(res);
+              			currVue.$broadcast("updatePiccode");
+						Pingback.errLogger(res.code, getErrPbBlock());
 						reject(res);
 					});
 				}
 			}, function(res) {
 				console.log("Server.checkAccount fail");
+				currVue.errmsg= Utils.showErrorMsg(res);
+              	currVue.$broadcast("updatePiccode");
+				Pingback.errLogger(res.code, getErrPbBlock());
 				reject(res);
 			});
 		});	
@@ -151,6 +156,7 @@ var Rxports = {
 				resolve(res);
 			}, function(res) {
 				console.log('Server.phoneRegister fail');
+				Pingback.errLogger(res.code, 'setpwd');
 				reject(res);
 			});
 		});	
@@ -238,17 +244,17 @@ var Rxports = {
 		});	
 	},
 
-	getScene: function(behavior){
+	getSceneName: function(behavior){
 		var sceneArr = [SCENE_LOGIN, SCENE_REGISTER, SCENE_FINDPWD, SCENE_MODPWD, SCENE_BIND];
 		return sceneArr[behavior-1];
 	},
 
-	getSceneVal: function(behavior){
+	getSceneValForPb: function(behavior){
 		var sceneArr = [PB_BEHAVIOR_LOGIN, PB_BEHAVIOR_REGISTER, PB_BEHAVIOR_FINDPWD, PB_BEHAVIOR_MODPWD, PB_BEHAVIOR_BIND];
 		return sceneArr[behavior-1];
 	},
 
-	getBlock: function(behavior){
+	getSceneBlock: function(behavior){
 		var blockArr = [SCENE_LOGIN, SCENE_REGISTER, SCENE_FINDPWD, SCENE_MODPWD, SCENE_BIND];
 		return blockArr[behavior-1];
 	},
@@ -419,46 +425,38 @@ var Rxports = {
 
 	confirmTokenLogin: function(self, behavior){
 		console.log('h5_moble  Utils.confirmTokenLogin run');
-			var _self = this;
-			var urlParams = (self.urlParams || Pingback.getUrlParamsStorage());
-			var scene = _self.getScene(behavior);
-			var block = _self.getBlock(behavior);
-			var pbBehavior = _self.getSceneVal(behavior);
-			var timerId = null;
-			var cookie = Storage.getCookie('P00001');
-			Storage.setSessionStorage('proType', pbBehavior);						// 设置个人中心10s文案类别
-			return new Promise(function(resolve, reject){
-				if(urlParams && urlParams.token){
-					Server.confirmTokenLogin(self, {token: urlParams.token, authcookie: cookie}).then(function(res) {	
+		var _self = this;
+		var urlParams = (self.urlParams || Pingback.getUrlParamsStorage());
+		var pbBehavior = _self.getSceneValForPb(behavior);
+		var timerId = null;
+		var cookie = Storage.getCookie('P00001');
+		Storage.setSessionStorage('proType', pbBehavior);						// 设置个人中心10s文案类别
+		return new Promise(function(resolve, reject){
+			if(urlParams && urlParams.token){
+				Server.confirmTokenLogin(self, {token: urlParams.token, authcookie: cookie}).then(function(res) {	
+					sendUserBehaviorPb();
+					resolve(res);
+				}, function(res) {
+					if(!!urlParams.redirectUrl){ 									// 如果存在redirectUrl，则token失效继续跳转走后面的逻辑
 						sendUserBehaviorPb();
 						resolve(res);
-					}, function(res) {
-						if(!!urlParams.redirectUrl){ 									// 如果存在redirectUrl，则token失效继续跳转走后面的逻辑
-							sendUserBehaviorPb();
-							resolve(res);
-						}else{
-							reject(res);
-						}
-					});
-				}else{
-					sendUserBehaviorPb();
-					resolve();
-				}
-			});
-		// 发送登录成功日志
+					}else{
+						reject(res);
+					}
+				});
+			}else{
+				sendUserBehaviorPb();
+				resolve();
+			}
+		});
 		function sendUserBehaviorPb(){
-			if(scene != _self.SCENE_FINDPWD){ 								// SCENE_FINDPWD 找回密码情况已经发送过
-				timerId = setTimeout(function() {							// 最迟TIMEOUT_GO 页面跳转
-					_self.gotoPageByUrl(urlParams);
-				}, TIMEOUT_GO);
-
-				/*Pingback.userBehavior(pbBehavior, function() {
-					clearTimeout(timerId);							// 如果pingback发送成功，取消定时器
-					Utils.gotoPageByUrl(urlParams);							// 页面立即跳转
-				});*/
-			}else{ 													// 找回密码情况不再发用户行为日志
+			timerId = setTimeout(function() {							// 最迟TIMEOUT_GO 页面跳转
 				_self.gotoPageByUrl(urlParams);
-			}		
+			}, TIMEOUT_GO);
+			Pingback.userBehavior(pbBehavior, function() {
+				clearTimeout(timerId);							// 如果pingback发送成功，取消定时器
+				_self.gotoPageByUrl(urlParams);							// 页面立即跳转
+			});
 		}
 	},
 
@@ -482,7 +480,6 @@ var Rxports = {
 		// 为跳转link添加pingback统计:
 		var self = this;
 		$('.j-pb-click').on(tapType, function(e) {
-			e.preventDefault();
 			if( self.codeTimerId !== null ) return false;          // 当codeTimerId存在时，不响应.j-pb-click下的任何点击操作
 			self.delayOpenPage($(this))
 		});
@@ -709,6 +706,11 @@ var Rxports = {
 		return (bool ? 1 : 0); 
 	},
 
+	getNewEId: function (){
+		var querystring = location.search.substring(1);
+		return querystring.indexOf('cok') !== -1 ? 'getNewE' : '';
+	},
+
 	/**
 	 * 根据用户信息获取用户是从来没有购买过奇异果vip还是购买过奇异果（过期或有效）
 	 * 值是字符串类型，用于pingback的ui字段
@@ -731,6 +733,20 @@ var Rxports = {
 			}
 		}
 		return arr;
+	},
+
+	/**
+	 * 把对象序列化成字符串
+	 * @param  {[type]} o [description]
+	 * @return {[type]}   [description]
+	 */
+	stringify: function(o) {
+		var a = [];
+		for(var k in o) {
+			var v = o[k];
+			if(o.hasOwnProperty(k) && (v !== undefined)) a.push(k + '=' + v);
+		}
+		return a.join('&');
 	},
 
 	/**
@@ -851,6 +867,14 @@ var Rxports = {
 	},
 
 	/**
+	 * 设置绑定手机号按钮的data-click
+	 */
+	getBindClick: function(type){
+		var arr = ['bind', 'change', 'bind'];
+		return arr[type-1];
+	},
+
+	/**
 	 * 设置绑定手机号按钮url的hash
 	 */
 	getBindHref: function(type){
@@ -891,6 +915,23 @@ var Rxports = {
 		return this.stringToObj(s, '&', '=');
 	},
 
+	/*获取错误日志中block*/
+	getErrPbBlock: function(){
+		var blockObj ={
+			'rphone' : 'signup',
+			'fphone' : 'msg',
+			'mphone' : 'msg',
+			'bmphone': 'bind', 
+			'bpfirst': 'change', 
+			'bpthird': 'bind',
+			'bphone': 'bind'
+		}
+		// hash 值后会带参数需要过滤掉，如：bmphone?v=6.0.0.45966
+		var curHashStr = location.hash.substring(1);
+		var curHash = (curHashStr.indexOf('?') === -1) ? curHashStr : curHashStr.substring(0, curHashStr.indexOf('?'));
+		return blockObj[curHash];
+	},
+
 	/**
 	 *  返回hash值和url中包含的参数字符串
 	 * @return [hsah, urlParams]
@@ -912,34 +953,46 @@ var Rxports = {
 			curHash = location.hash;
 		}else if(pageType === 'findpwd' || pageType === 'modpwd' || pageType === 'bind' || pageType === 'bindbyemail' || pageType === 'changephone'){
 			(pageType === 'findpwd') && !hashStr && (location.hash = '#findex'); // 默认打开找回密码首页
-			(pageType === 'bind') && !hashStr  && (curHash = '#bphone');
-			(pageType === 'bindbyemail') && !hashStr  && (curHash = '#bmemail');
-			(pageType === 'changephone') && !hashStr  && (curHash = '#bpfirst');
-
+			(pageType === 'bind') && !hashStr  && (location.hash = '#bphone');
+			(pageType === 'bindbyemail') && !hashStr  && (location.hash = '#bmemail');
+			(pageType === 'changephone') && !hashStr  && (location.hash = '#bpfirst');
 			if(hashStr.indexOf('?') !== -1){
 				curHash = location.hash.split('?')[0];
 				paramsStr = location.hash.split('?')[1];
 			}else{
 				curHash = location.hash;
 			}
-			if(curHash == '#findex'){
-		        Pingback.pageLoaded();                    // 展示pingback: 忘记密码首页
-		    }
 			if(curHash == '#fpwd' || curHash == '#mpwd' || curHash === '#bmphone'){
 				if(!!paramsStr){
 					var obj = this.stringToObj(paramsStr, '&', '=');
 					localStorage.setItem('versionApk', obj.v); //  把apk版本号记录到本地储存，为修改忘记密码第三步用*/
 				}
-				curVue.resetpwdToken = Storage.getRstPwdToken();     // hash为fpwd时，获取P00014值，cookie P00014的值，验证邮箱通过后种上。
-				Pingback.pageLoaded('reset');               // 展示pingback: 忘记密码-通过邮箱操作第三步页面
+				(curHash == '#fpwd' || curHash == '#mpwd') &&　(curVue.resetpwdToken = Storage.getRstPwdToken());     // hash为fpwd时，获取P00014值，cookie P00014的值，验证邮箱通过后种上。
 			}
-			if(curHash === '#bmemail'){
-			    curVue.gointoemailurl = 'http://mail.' + curVue.user.email.split('@')[1];
-			    Pingback.pageLoaded('mail');                    //  第一步
-		    }else if(curHash === '#bmphone'){
-		      	Pingback.pageLoaded('bind');                    //  第二步
-		    }
 		}
+		if(curHash == '#rphone'){
+			Pingback.pageLoaded('signup');
+		}else if(curHash == '#rcode' || curHash == '#fphone' ||　curHash == '#mphone'){
+			Pingback.pageLoaded('msg');	
+		}else if(curHash == '#rpwd'){
+			Pingback.pageLoaded('setpwd');	
+		}else if(curHash == '#findex'){
+	        Pingback.pageLoaded(); 
+	    }else if(curHash == '#fcode'　|| curHash == '#mcode' ||　curHash == '#bcode' || curHash == '#bmcode' || curHash == '#bpfourth'){
+	        Pingback.pageLoaded('msgcode');	
+	    }else if(curHash == '#fpwd' || curHash == '#mpwd'){
+	        Pingback.pageLoaded('reset');
+	    }else if(curHash == '#femail' || curHash == '#memail' ||　curHash == '#bmemail'){
+	        Pingback.pageLoaded('mail');
+	    }else if(curHash == '#femailr'　|| curHash == '#memailr'){
+	        Pingback.pageLoaded('mailcode');	
+	    }else if(curHash == '#bphone' ||　curHash == '#bmphone' ||　curHash == '#bpthird'){
+	        Pingback.pageLoaded('bind');       
+	    }else if(curHash == '#bpfirst'){
+	        Pingback.pageLoaded('change');	   
+	    }else if(curHash == '#bpsecond'){
+	       	Pingback.pageLoaded('change_again');	
+	    }
       	curVue.hash = curHash.replace('#','');
 	},
 
@@ -954,38 +1007,3 @@ var Rxports = {
 }
 
 module.exports = Rxports
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

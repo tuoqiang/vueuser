@@ -3,24 +3,27 @@
 		<div class="form-group-in  j_err_iconbox" :class='needpiccode ? "" : "form-group-in-nnobor"'>
 			<label for="passwd" class="label-passwd label-piccode">密&nbsp;&nbsp;&nbsp;&nbsp;码：</label>
 			<!-- 密码可以变成明文显示 -->
-			<input  :type="pwdType" 
+			<input  
+          :type="pwdType" 
 					class="form-control form-control-pwd" 
 					name="passwd" 
 					placeholder="请输入密码" 
 					value="{{ pwd }}" 
-					v-model="pwd" 
-					/>
-			<i 	class="icon icon-eye icon-eye-login" 
+					v-model="pwd" />
+			<i 	
+          class="icon icon-eye icon-eye-login" 
 					:class='pwdType=="password" ? "icon-passwd-see" : ""' 
 					@click="showPwd" 
 					v-show="pwd.length>1" >
-					
 			</i>
-			<a href="javascript:;" data-href="findpwd.html#findex" class="formcommon_a color-01 j-pb-click" data-click="forgot">忘记密码</a>
+			<a 
+          href="javascript:;" 
+          data-href="findpwd.html#findex" 
+          class="formcommon_a color-01 j-pb-click" 
+          data-click="forgot">忘记密码</a>
 		</div >
 	</div>
 </template>
-
 
 <script>
 module.exports = {
