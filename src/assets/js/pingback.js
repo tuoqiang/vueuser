@@ -1,10 +1,10 @@
-
 import Storage from 'assets/js/storage.js'
 
 var logType = ['506261_20', '506261_21', '506261_5', '506261_0'];
 var ua = navigator.userAgent;
 var rootUrl = 'http://msg.ptqy.gitv.tv/tmpstats.gif?';
 var WECHAT_RE = /MicroMessenger/i;
+var URL_PARAMS = 'urlParams';
 // hu
 var HU_NO_VIP_MEMBER			= -1		// 不是会员
 var HU_EXPIRE_MEMBER 			= 0			// 封停会员
@@ -20,10 +20,10 @@ var Rxports = {
 	initParams: null,
 
 	init: function(currpage, pu, userType, isNewE) {
+		console.log('h5_moble pingback init run');
 		var self = this;
 		var session = null;
 		self.currpage = currpage;
-		/*var hu = self.hu(vip);				// 会员标识*/
 		var hu = self.getHuByUserType(userType);
 		
 		if(typeof pu === 'object' && pu !== null) {
@@ -93,7 +93,7 @@ var Rxports = {
 			Storage.setCookie('F00002', self.initParams.u);  // 把移动设备deviceid种到F00002中
 		}
 
-		// isvipac可能取值0:没有权益;  1:有权益未激活。
+		// isvipact可能取值0:没有权益;  1:有权益未激活。
 		if(!!session.isvipact || session.isvipact == 0){ // 如果存在isvipact，则肯定来自F项目（含激活流程）的二维码页
 			self.initParams.tvisvipact = session.isvipact;
 		}
@@ -284,7 +284,7 @@ var Rxports = {
 	 * @return {[type]} [description]
 	 */
 	getUrlParamsStorage: function(){
-		var storage = Storage.getSessionStorage(this.URL_PARAMS);
+		var storage = Storage.getSessionStorage(URL_PARAMS);
 		console.log('UrlParams localStorage: ', storage);
 		return storage;
 	},
@@ -316,8 +316,6 @@ var Rxports = {
 	    }
 	    return str;
 	},
-
-	
 }
 
 module.exports = Rxports

@@ -6,7 +6,6 @@
 	</div>
 </template>
 
-
 <script>
 module.exports = {
   props:{

@@ -1,18 +1,38 @@
 <template>
   	<topbar text="个人中心" :isvip="isvip"></topbar>
-    <error-msg :errmsg='errmsg' v-if="errmsg"></error-msg>
-    <user-info :username="username" :username="username" :userstatus="userstatus" :userphoto="userphoto" ></user-info>
-    <profile-bg :imgsrc="viprightimg.url" :imgalt="viprightimg.alt"></profile-bg>
-    <button-common btnclass="btn-openvip j-gold" :btntext="btn.btntext" :datahref="btn.datahref"></button-common>  
-    <toast  content="只差一步<br>请在电视上输入激活码"
-            cancelbtntxt="知道啦"
-            v-if="isvipact.isshow">   
+    <error-msg 
+        :errmsg='errmsg' 
+        v-if="errmsg">
+    </error-msg>
+    <user-info 
+        :username="username" 
+        :username="username" 
+        :userstatus="userstatus" 
+        :userphoto="userphoto" >
+    </user-info>
+    <profile-bg 
+        :imgsrc="viprightimg.url" 
+        :imgalt="viprightimg.alt">
+    </profile-bg>
+    <button-common 
+        btnclass="btn-openvip j-gold" 
+        :btntext="btn.btntext" 
+        :datahref="btn.datahref">
+    </button-common>  
+    <toast  
+        content="只差一步<br>请在电视上输入激活码"
+        cancelbtntxt="知道啦"
+        v-if="isvipact.isshow">   
     </toast>
-    <gift-vip @click="hideGiftBox" v-if="giftvip.isshow" :isvip="isvip" :gifturl="giftvip.gifturl"></gift-vip>
+    <gift-vip 
+        @click="hideGiftBox" 
+        v-if="giftvip.isshow" 
+        :isvip="isvip" 
+        :gifturl="giftvip.gifturl">
+    </gift-vip>
 </template>
 
 <script>
-
 import Lib from 'assets/js/lib.js'
 import Utils from 'assets/js/utils.js'
 import Config from 'assets/js/config.js'
@@ -63,8 +83,8 @@ export default {
       UserInfo,
       ProfileBg,
   },
-  created: function () {
-      console.log('created run');
+  ready: function(){
+  	  console.log('ready run');
       var self = this;
       var timer = null;
       var vipRightImgArr = [];
@@ -123,15 +143,16 @@ export default {
                 console.log('Server.getGiftVip request fail');
                 self.errmsg = Utils.showErrorMsg(res);   
             });
-        })();           
+        })();  
+
+        Utils.setEvents();
+        Pingback.init('account', userinfo.uid, userType);   // 如果用户未开通过vip, 传-1值
+        Pingback.pageLoaded('loginsuc', ui);         
       },function(res){
           console.log('Server.getUserInfo request fail');
-          self.errmsg = Utils.showErrorMsg(res);   
+          self.errmsg = Utils.showErrorMsg(res); 
+          Pingback.errLogger(e.code, 'loginsuc');
       });
-  },
-  ready: function(){
-  	  console.log('ready run')
-      Utils.setEvents();
   },
   methods: {
       hideGiftBox: function(){
@@ -149,8 +170,3 @@ export default {
   }  
 }
 </script>
-
-
-
-
-

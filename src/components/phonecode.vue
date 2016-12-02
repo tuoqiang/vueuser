@@ -4,17 +4,21 @@
 		<div class="form-group form-bortop form-borbot" :class="iptclass">
 			<div class="form-group-in form-group-in-nnobor j_err_iconbox">
 				<label for="phonecode" class="label-phonecode">验证码：</label>
-				<input  type="tel" 
+				<input  
+                type="tel" 
                 class="form-control form-control-phonecode" 
                 maxlength="6"
                 name="phonecode" 
                 placeholder="请输入验证码"
                 v-model="phonecode" 
                 value="{{ phonecode }}" >
-				<a  :data-href="regethref" 
-            class="formcommon_a j-pb-click" 
-            :class="btnclass" >
-              {{countdowntext}}
+				<a      
+                class="formcommon_a j-pb-click" 
+                :data-href="regethref" 
+                :class="btnclass" 
+                :data-click="dataclick"
+                :data-block="datablock" >
+                  {{countdowntext}}
         </a>
 			</div>
 		</div>
@@ -30,6 +34,8 @@ module.exports = {
   	'regethref':'',
     'iptclass':'',
     'phonetxtclass':'',
+    'dataclick':'',
+    'datablock':'',
   },
   data() {
     return {
@@ -38,7 +44,6 @@ module.exports = {
       btnclass:'btn-resend'
     }
   },
-
   events: {
     'getPhonecodeVal': function(){
       	this.errormsg = Utils.checkPhonecode(this.phonecode);

@@ -1,32 +1,35 @@
-
 <template>
 	<div  class="form-group form-group-piccode form-group-bt" v-show='needpiccode'>
-		<div class="form-group-in form-group-in-nnobor j_err_iconbox" id="j_l_code">
+		<div class="form-group-in form-group-in-nnobor j_err_iconbox">
 			<label for="piccode" class="label-piccode">验证码：</label>
-			<input 	type="text" 
-					class="form-control form-control-piccode"  
-					name="piccode" 
-					placeholder="请输入右侧验证码"
-					value="{{ piccode }}" 
-					v-model="piccode" 
-					/>
+			<input 	
+            type="text" 
+  					class="form-control form-control-piccode"  
+  					name="piccode" 
+  					placeholder="请输入右侧验证码"
+  					value="{{ piccode }}" 
+  					v-model="piccode" />
 			<i class="form-piccode" @click="updatePiccode">
-				<img 	
-					:src="piccodeUrl" 
-					class="j-btn img-responsive j-pb-click"
-					data-click="captcha">
+				  <img 	
+  					:src="piccodeUrl" 
+  					class="j-btn img-responsive j-pb-click"
+            :data-page="datapage"
+            :data-block="datablock"
+            :data-click="dataclick" >
 			</i>
 		</div >
 	</div>
 </template>
-
 
 <script>
 import Server from 'assets/js/server.js'
 
 module.exports = {
   props:{
-  		needpiccode:false
+  		needpiccode:false,
+      datapage:'',
+      datablock:'',
+      dataclick:'captcha',
   },
   data() {
     return {

@@ -1,28 +1,26 @@
 <template>
 	<div id="form-group-1" class="form-group form-bortop">
 		<div class="form-group-in j_err_iconbox" id="j_l_zh">
-			<label for="email" class="label-email label-piccode">{{labelname}}</label>
+			<label  for="email" class="label-email label-piccode">{{labelname}}</label>
 			<input 	type="email" 
-					class="form-control form-control-email form-control-w" 
-					id="email" 
-					name="email" 
-					:placeholder="iptplaceholder" 
-					value="{{ localaccount || account }}" 
-					v-model="account" 
-					:readonly="readonly"
-					/>
-			<i 		class="icon icon01 icon-delete" 
-					id="j-btn-clearInput" 
-					v-show="account || localaccount" 
-					@click=clearIpt
-          v-if='!readonly'></i>
+    					class="form-control form-control-email form-control-w" 
+    					id="email" 
+    					name="email" 
+    					:placeholder="iptplaceholder" 
+    					value="{{ localaccount || account }}" 
+    					v-model="account" 
+    					:readonly="readonly" />
+			 <i 		class="icon icon01 icon-delete" 
+    					id="j-btn-clearInput" 
+    					v-show="account || localaccount" 
+    					@click=clearIpt
+              v-if='!readonly' >
+       </i>
 		</div>
 	</div>
 </template>
 
-
 <script>
-
 import Utils from 'assets/js/utils.js'
 
 module.exports = {

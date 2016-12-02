@@ -8,7 +8,6 @@
   </div>
 </template>
 
-
 <script>
 
 module.exports = {

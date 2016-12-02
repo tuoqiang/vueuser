@@ -422,6 +422,7 @@ a { text-decoration: none; }
 
 .contract { position: absolute; bottom: -0.24rem; font-size: 11px; color: #999; }
 .contract a { color: #8ac911; }
+.contract .lft3{ left: 0.3rem; }
 .form-phonetxt{
   position: absolute; left: 50%;  top:-0.1rem;
   width: 90%; margin: 0rem  auto 0.1rem;

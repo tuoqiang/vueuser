@@ -1,11 +1,11 @@
 <template>
-  <a href="javascript:;"
+  <a 
+     href="javascript:;"
   	 class="btn form_btnpos j-pb-click"  
      :class = "btnclass"
   	 :data-href="datahref"
-  	 :data-click="dataclick"
-  	 >
-  	 {{btntext}}
+  	 :data-click="dataclick">
+  	   {{btntext}}
   </a>
 </template>
 

@@ -1,17 +1,27 @@
 <template>
-  <div class="form-group {{fatherclass}}">
-    <div class="form-group-in {{fatherinclass}}" id="j_r_pwd">
-      <label class="label-piccode labelpwd">{{labelname}}</label>
-      <form-child-oldpwd v-if="modelpwd == 'oldpwd'" :pwdtype="pwdtype" :placeholder="iptplaceholder"> </form-child-oldpwd>
-      <form-child-pwd v-if="modelpwd == 'pwd'" :pwdtype="pwdtype" :placeholder="iptplaceholder"> </form-child-pwd>
-      <form-child-compwd v-if="modelpwd == 'compwd'" :pwdtype="pwdtype" :placeholder="iptplaceholder"> </form-child-compwd>
+  <div class="form-group" :class="fatherclass">
+    <div class="form-group-in" class="fatherinclass">
+        <label class="label-piccode labelpwd">{{labelname}}</label>
+        <form-child-oldpwd 
+                            v-if="modelpwd == 'oldpwd'" 
+                            :pwdtype="pwdtype" 
+                            :placeholder="iptplaceholder">
+        </form-child-oldpwd>
+        <form-child-pwd     
+                            v-if="modelpwd == 'pwd'" 
+                            :pwdtype="pwdtype" 
+                            :placeholder="iptplaceholder">
+        </form-child-pwd>
+        <form-child-compwd  
+                            v-if="modelpwd == 'compwd'" 
+                            :pwdtype="pwdtype" 
+                            :placeholder="iptplaceholder">
+        </form-child-compwd>
     </div>
   </div>
 </template>
 
-
 <script>
-
 import FormChildOldpwd from 'components/form-child-oldpwd'
 import FormChildPwd from 'components/form-child-pwd'
 import FormChildCompwd from 'components/form-child-compwd'

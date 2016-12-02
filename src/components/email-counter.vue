@@ -1,14 +1,18 @@
 <template>
 	<div>
 		<div class="form-phonetxt3">已发送<span class="spancol">修改请求链接至此邮箱</span><br><span id="emailtext">{{localaccount}}</span></div>
-        <div class="pwd-email-btn j-btn j-pb-click" data-click="again" data-block="mailcode" 
-        	:class="btnclass"
-        	@click="sendemailagain"
-        	>{{countdowntext}}
+        <div 
+            class="pwd-email-btn j-btn j-pb-click" 
+            data-click="again" 
+            data-block="mailcode" 
+          	:class="btnclass"
+            :data-click="dataclick"
+            :data-block="datablock"
+          	@click="sendemailagain" >
+              {{countdowntext}}
         </div>
 	</div>
 </template>
-
 
 <script>
 import Utils from 'assets/js/utils.js'
@@ -17,6 +21,8 @@ module.exports = {
   props:{
   	'localaccount':'',
   	'datahref':'',
+    'dataclick':'',
+    'datablock':'',
   },
   data() {
     return {
@@ -31,9 +37,6 @@ module.exports = {
   		if(this.disableBtnTime > 0){ return false;}
   		this.$dispatch('send-email-again');
   	},
-  },
-  created: function () {
-      console.log('created this.email = '+this.email);
   },
   events: {
     'startEmailCountdown': function(){
