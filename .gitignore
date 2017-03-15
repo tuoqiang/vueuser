@@ -4,6 +4,9 @@ ehthumbs.db
 .gitattributes
 .project
 node_modules/
+dist/
+src/assets/js/server.js
+
 
 # Folder config file
 Desktop.ini
